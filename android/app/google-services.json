@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1092580578696",
+    "project_id": "maher-store-55aad",
+    "storage_bucket": "maher-store-55aad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092580578696:android:b0301235e668b2733ed63d",
+        "android_client_info": {
+          "package_name": "com.maherstore.storehouse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdyjo666DOD7N8TxLPAUQixpQpVLJeUfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
