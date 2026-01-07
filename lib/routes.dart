@@ -6,6 +6,8 @@ import 'package:store_house/view/screen/categories/add.dart';
 import 'package:store_house/view/screen/categories/edit.dart';
 import 'package:store_house/view/screen/categories/view.dart';
 import 'package:store_house/view/screen/home.dart';
+import 'package:store_house/view/screen/invoices/incoming_invoices.dart';
+import 'package:store_house/view/screen/invoices/incoming_invoices_add.dart';
 import 'package:store_house/view/screen/items/add.dart';
 import 'package:store_house/view/screen/items/edit.dart';
 import 'package:store_house/view/screen/items/view.dart';
@@ -34,6 +36,8 @@ class AppRoute {
   static const String wholesaleAdd = "/wholesaleAdd";
 
   static const String orderCardsPage = "/orderCardsPage";
+  static const String incomingInvoices = "/incomingInvoices";
+  static const String incomingInvoicesAdd = "/incomingInvoicesAdd";
 }
 
 List<GetPage<dynamic>>? routes = [
@@ -62,4 +66,12 @@ List<GetPage<dynamic>>? routes = [
   GetPage(name: AppRoute.wholesaleAdd, page: () => const WholesaleAdd()),
 
   GetPage(name: AppRoute.orderCardsPage, page: () => const OrderCardsPage()),
+  GetPage(
+    name: AppRoute.incomingInvoices,
+    page: () => const IncomingInvoices(),
+  ),
+  GetPage(
+    name: AppRoute.incomingInvoicesAdd,
+    page: () => const IncomingInvoicesAdd(),
+  ),
 ];

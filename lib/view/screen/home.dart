@@ -89,6 +89,13 @@ class HomePage extends StatelessWidget {
                                   ),
                                   Cardadmin(
                                     onTap: () {
+                                      Get.toNamed(AppRoute.incomingInvoices);
+                                    },
+                                    url: AppImageAsset.logo,
+                                    title: "الفواتير الواردة",
+                                  ),
+                                  Cardadmin(
+                                    onTap: () {
                                       Get.toNamed(AppRoute.scanProductQrPage);
                                     },
                                     url: AppImageAsset.logo,
