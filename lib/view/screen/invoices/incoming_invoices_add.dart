@@ -20,13 +20,6 @@ class IncomingInvoicesAdd extends StatelessWidget {
                   : "تعديل فاتورة",
             ),
             centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.check_circle_outline),
-                onPressed: () => controller.saveAndCloseInvoice(),
-                tooltip: "إغلاق وحفظ البطاقة",
-              ),
-            ],
           ),
           body: Stack(
             children: [
@@ -64,7 +57,7 @@ class IncomingInvoicesAdd extends StatelessWidget {
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppColor.primaryColor.withOpacity(0.3),
+                          color: AppColor.primaryColor.withValues(alpha: 0.3),
                         ),
                       ),
                       child: TextField(

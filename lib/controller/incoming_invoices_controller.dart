@@ -2,13 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/core/class/statusrequest.dart';
-import 'package:store_house/core/functions/handingdatacontroller.dart';
 import 'package:store_house/data/datasource/remote/items_data.dart';
+import 'package:store_house/data/datasource/remote/incoming_invoices_data.dart';
 import 'package:store_house/data/model/itemsmodel.dart';
 import 'package:store_house/sqflite.dart';
 
 class IncomingInvoicesControllerImp extends GetxController {
   final ItemsData itemsData = ItemsData(Get.find());
+  final IncomingInvoicesData remoteData =
+      IncomingInvoicesData(); // إزالة Get.find لأننا لا نستخدم Crud هنا
   final SqlDb sqlDb = SqlDb();
 
   StatusRequest statusRequest = StatusRequest.none;
@@ -308,6 +310,63 @@ class IncomingInvoicesControllerImp extends GetxController {
     await sqlDb.delete("incoming_invoices", "invoice_id = $id");
     await sqlDb.delete("incoming_invoice_items", "invoice_id = $id");
     await getAllInvoices();
+  }
+
+  Future<void> uploadInvoiceToServer(Map<String, dynamic> invoice) async {
+    statusRequest = StatusRequest.loading;
+    update();
+
+    try {
+      int invoiceId = invoice['invoice_id'];
+
+      // 1. جلب العناصر الخاصة بهذه الفاتورة من قاعدة البيانات المحلية
+      final db = await sqlDb.db;
+      final itemsRes = await db!.query(
+        "incoming_invoice_items",
+        where: "invoice_id = ?",
+        whereArgs: [invoiceId],
+      );
+
+      // 2. تجهيز البيانات للإرسال
+      Map data = {
+        "supplier_name": invoice['supplier_name'],
+        "local_id": invoiceId,
+        "items": itemsRes,
+      };
+
+      if (kDebugMode) {
+        print("--- Uploading Data to Server ---");
+        print(data);
+        print("--------------------------------");
+      }
+
+      // 3. إرسال البيانات للسيرفر باستخدام الرابط من AppLink
+      // تأكد من تعريف AppLink.incomingInvoicesAdd في ملف linkapi.dart
+      var response = await remoteData.uploadInvoice(data);
+
+      if (response != null && response['status'] == "success") {
+        statusRequest = StatusRequest.success;
+        // تحديث الحالة محلياً لتمييزها كمرفوعة
+        await sqlDb.update("incoming_invoices", {
+          "status": "uploaded",
+        }, "invoice_id = $invoiceId");
+        await getAllInvoices();
+        Get.snackbar("نجاح", "تم رفع الفاتورة للسيرفر بنجاح");
+      } else {
+        statusRequest = StatusRequest.serverfailure;
+        String msg =
+            (response != null && response is Map)
+                ? (response['message'] ?? "فشل الرفع")
+                : "خطأ في الاتصال بالسيرفر";
+        Get.snackbar("تنبيه", msg);
+      }
+    } catch (e) {
+      if (kDebugMode) print("Upload error: $e");
+      Get.snackbar("خطأ", "حدث خطأ غير متوقع");
+    } finally {
+      statusRequest = StatusRequest.none;
+      update();
+    }
   }
 
   @override

@@ -1,8 +1,8 @@
-import 'package:dartz/dartz.dart' as StatusRequest;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/controller/incoming_invoices_controller.dart';
 import 'package:store_house/core/class/handlingdataview.dart';
+import 'package:store_house/core/class/statusrequest.dart';
 import 'package:store_house/core/constant/color.dart';
 
 class IncomingInvoices extends StatelessWidget {
@@ -14,16 +14,7 @@ class IncomingInvoices extends StatelessWidget {
     final controller = Get.put(IncomingInvoicesControllerImp());
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("الفواتير الواردة"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => controller.getAllInvoices(),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text("الفواتير الواردة"), centerTitle: true),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.primaryColor,
         onPressed: () {
@@ -84,7 +75,7 @@ class IncomingInvoices extends StatelessWidget {
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColor.primaryColor.withOpacity(0.1),
+                          color: AppColor.primaryColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -101,12 +92,64 @@ class IncomingInvoices extends StatelessWidget {
                       ),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          "التاريخ: ${invoice['invoice_date']}",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "التاريخ: ${invoice['invoice_date']}",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            if (invoice['status'] != 'uploaded')
+                              SizedBox(
+                                height: 30,
+                                child: OutlinedButton.icon(
+                                  onPressed:
+                                      () => controller.uploadInvoiceToServer(
+                                        invoice,
+                                      ),
+                                  icon: const Icon(
+                                    Icons.cloud_upload_outlined,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    "رفع البطاقة",
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColor.primaryColor,
+                                    side: const BorderSide(
+                                      color: AppColor.primaryColor,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              const Row(
+                                children: [
+                                  Icon(
+                                    Icons.cloud_done,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "تم الرفع",
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
                       ),
                       trailing: Row(
