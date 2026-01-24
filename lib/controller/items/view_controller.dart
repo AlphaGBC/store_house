@@ -133,44 +133,92 @@ class ItemsControllerImp extends ItemsController {
 
   // ----------------- Local upsert (from remote) -----------------
 
+  // Future<void> _upsertLocal(ItemsModel model) async {
+  //   try {
+  //     final rows = await _readLocalRows(model.itemsCategories ?? 0);
+  //     final idStr = model.itemsId.toString();
+  //     final exists = rows.any((r) => (r['items_id'] ?? '').toString() == idStr);
+
+  //     final values = {
+  //       "items_id": model.itemsId,
+  //       "items_name": model.itemsName,
+  //       "items_storehouse_count": model.itemsStorehouseCount ?? 0,
+  //       "items_pointofsale1_count": model.itemsPointofsale1Count ?? 0,
+  //       "items_pointofsale2_count": model.itemsPointofsale2Count ?? 0,
+  //       "items_cost_price": model.itemsCostPrice,
+  //       "items_wholesale_price": model.itemsWholesalePrice,
+  //       "items_retail_price": model.itemsRetailPrice,
+  //       "items_wholesale_discount": model.itemsWholesaleDiscount,
+  //       "items_retail_discount": model.itemsRetailDiscount,
+  //       "items_qr": model.itemsQr,
+  //       "items_categories": model.itemsCategories,
+  //       "items_date": model.itemsDate,
+  //       "categories_id": model.categoriesId,
+  //       "categories_name": model.categoriesName,
+  //       "categories_image": model.categoriesImage,
+  //       "categories_date": model.categoriesDate,
+  //       "itemswholesalepricediscount": model.itemswholesalepricediscount,
+  //       "itemsretailpricediscount": model.itemsretailpricediscount,
+  //     };
+
+  //     if (exists) {
+  //       await sqlDb.update("itemsview", values, "items_id = $idStr");
+  //       //print("Local updated item id=$idStr");
+  //     } else {
+  //       await sqlDb.insert("itemsview", values);
+  //       //print("Local inserted item id=$idStr");
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print("upsertLocal items error id=${model.itemsId}: $e");
+  //     }
+  //   }
+  // }
+
   Future<void> _upsertLocal(ItemsModel model) async {
+    final db = await sqlDb.db;
+    if (db == null) return;
+
+    final values = {
+      "items_id": model.itemsId,
+      "items_name": model.itemsName ?? '',
+      "items_storehouse_count": model.itemsStorehouseCount ?? 0,
+      "items_pointofsale1_count": model.itemsPointofsale1Count ?? 0,
+      "items_pointofsale2_count": model.itemsPointofsale2Count ?? 0,
+      "items_cost_price": model.itemsCostPrice ?? 0,
+      "items_wholesale_price": model.itemsWholesalePrice ?? 0,
+      "items_retail_price": model.itemsRetailPrice ?? 0,
+      "items_wholesale_discount": model.itemsWholesaleDiscount ?? 0,
+      "items_retail_discount": model.itemsRetailDiscount ?? 0,
+      "items_qr": model.itemsQr ?? '',
+      "items_categories": model.itemsCategories ?? 0,
+      "items_date": model.itemsDate ?? DateTime.now().toString(),
+      "categories_id": model.categoriesId ?? 0,
+      "categories_name": model.categoriesName ?? '',
+      "categories_image": model.categoriesImage ?? '',
+      "categories_date": model.categoriesDate ?? DateTime.now().toString(),
+      "itemswholesalepricediscount": model.itemswholesalepricediscount ?? 0,
+      "itemsretailpricediscount": model.itemsretailpricediscount ?? 0,
+    };
+
     try {
-      final rows = await _readLocalRows(model.itemsCategories ?? 0);
-      final idStr = model.itemsId.toString();
-      final exists = rows.any((r) => (r['items_id'] ?? '').toString() == idStr);
-
-      final values = {
-        "items_id": model.itemsId,
-        "items_name": model.itemsName,
-        "items_storehouse_count": model.itemsStorehouseCount ?? 0,
-        "items_pointofsale1_count": model.itemsPointofsale1Count ?? 0,
-        "items_pointofsale2_count": model.itemsPointofsale2Count ?? 0,
-        "items_cost_price": model.itemsCostPrice,
-        "items_wholesale_price": model.itemsWholesalePrice,
-        "items_retail_price": model.itemsRetailPrice,
-        "items_wholesale_discount": model.itemsWholesaleDiscount,
-        "items_retail_discount": model.itemsRetailDiscount,
-        "items_qr": model.itemsQr,
-        "items_categories": model.itemsCategories,
-        "items_date": model.itemsDate,
-        "categories_id": model.categoriesId,
-        "categories_name": model.categoriesName,
-        "categories_image": model.categoriesImage,
-        "categories_date": model.categoriesDate,
-        "itemswholesalepricediscount": model.itemswholesalepricediscount,
-        "itemsretailpricediscount": model.itemsretailpricediscount,
-      };
-
-      if (exists) {
-        await sqlDb.update("itemsview", values, "items_id = $idStr");
-        //print("Local updated item id=$idStr");
-      } else {
-        await sqlDb.insert("itemsview", values);
-        //print("Local inserted item id=$idStr");
+      await db.transaction((txn) async {
+        final updated = await txn.update(
+          'itemsview',
+          values,
+          where: 'items_id = ?',
+          whereArgs: [model.itemsId],
+        );
+        if (updated == 0) {
+          await txn.insert('itemsview', values);
+        }
+      });
+      if (kDebugMode) {
+        print("Upsert (transaction) succeeded for id=${model.itemsId}");
       }
     } catch (e) {
       if (kDebugMode) {
-        print("upsertLocal items error id=${model.itemsId}: $e");
+        print("upsertLocal transaction error id=${model.itemsId}: $e");
       }
     }
   }
@@ -222,136 +270,6 @@ class ItemsControllerImp extends ItemsController {
     }
   }
 
-  // Future<bool> _addRemote(ItemsModel model) async {
-  //   try {
-  //     Map payload = {
-  //       "name": model.itemsName ?? "",
-  //       "storehousecount": (model.itemsStorehouseCount ?? 0).toString(),
-  //       "pointofsale1count": (model.itemsPointofsale1Count ?? 0).toString(),
-  //       "pointofsale2count": (model.itemsPointofsale2Count ?? 0).toString(),
-  //       "costprice": model.itemsCostPrice?.toString() ?? "0",
-  //       "wholesaleprice": model.itemsWholesalePrice?.toString() ?? "0",
-  //       "retailprice": model.itemsRetailPrice?.toString() ?? "0",
-  //       "wholesalediscount": model.itemsWholesaleDiscount?.toString() ?? "0",
-  //       "retaildiscount": model.itemsRetailDiscount?.toString() ?? "0",
-  //       "items_qr": model.itemsQr ?? "",
-  //       "items_categories": model.itemsCategories?.toString() ?? "",
-  //     };
-
-  //     // align items_date for server
-  //     DateTime? localDt = _parseDate(model.itemsDate);
-  //     if (localDt != null) {
-  //       payload["items_date"] = _formatForServer(
-  //         localDt.subtract(serverOffset),
-  //       );
-  //     } else {
-  //       payload["items_date"] = _formatForServer(
-  //         DateTime.now().subtract(serverOffset),
-  //       );
-  //     }
-
-  //     final img = model.itemsImage ?? '';
-  //     if (img.isNotEmpty && File(img).existsSync()) {
-  //       // multipart add (image upload)
-  //       var resp = await itemsData.add(payload, File(img));
-
-  //       var st = handlingData(resp);
-  //       if (st == StatusRequest.success && resp['status'] == "success") {
-  //         // update local id/image/date if server returned them
-  //         try {
-  //           if (resp.containsKey('data') && resp['data'] != null) {
-  //             final d = resp['data'];
-  //             String? newId;
-  //             String? newImage;
-  //             String? newDate;
-  //             if (d is Map) {
-  //               newId = d['items_id']?.toString();
-  //               newImage = d['items_image']?.toString();
-  //               newDate = d['items_date']?.toString();
-  //             } else if (d is List && d.isNotEmpty && d[0] is Map) {
-  //               final m = d[0] as Map;
-  //               newId = m['items_id']?.toString();
-  //               newImage = m['items_image']?.toString();
-  //               newDate = m['items_date']?.toString();
-  //             }
-  //             final oldId = model.itemsId?.toString() ?? '';
-  //             if (newId != null &&
-  //                 newId.isNotEmpty &&
-  //                 oldId.isNotEmpty &&
-  //                 newId != oldId) {
-  //               await sqlDb.update("itemsview", {
-  //                 "items_id": int.tryParse(newId) ?? newId,
-  //                 if (newImage != null) "items_image": newImage,
-  //                 if (newDate != null) "items_date": newDate,
-  //               }, "items_id = $oldId");
-  //             }
-  //           }
-  //         } catch (e) {
-  //           if (kDebugMode) {
-  //             print(
-  //               "addRemote multipart: could not update local after add: $e",
-  //             );
-  //           }
-  //         }
-  //         return true;
-  //       } else {
-  //         return false;
-  //       }
-  //     } else {
-  //       // use addupgrade (text)
-  //       var resp = await itemsData.addupgrade(payload);
-  //       var st = handlingData(resp);
-  //       if (st == StatusRequest.success && resp['status'] == "success") {
-  //         try {
-  //           if (resp.containsKey('data') && resp['data'] != null) {
-  //             final d = resp['data'];
-  //             String? newId;
-  //             String? newDate;
-  //             if (d is Map && d.containsKey('items_id')) {
-  //               newId = d['items_id']?.toString();
-  //               newDate = d['items_date']?.toString();
-  //             } else if (d is List &&
-  //                 d.isNotEmpty &&
-  //                 d[0] is Map &&
-  //                 d[0].containsKey('items_id')) {
-  //               final m = d[0] as Map;
-  //               newId = m['items_id']?.toString();
-  //               newDate = m['items_date']?.toString();
-  //             }
-  //             final oldId = model.itemsId?.toString() ?? '';
-  //             if (newId != null &&
-  //                 newId.isNotEmpty &&
-  //                 oldId.isNotEmpty &&
-  //                 newId != oldId) {
-  //               await sqlDb.update("itemsview", {
-  //                 "items_id": int.tryParse(newId) ?? newId,
-  //                 if (newDate != null) "items_date": newDate,
-  //               }, "items_id = $oldId");
-  //             }
-  //           }
-  //         } catch (e) {
-  //           if (kDebugMode) {
-  //             print(
-  //               "addRemote text: could not update local after addupgrade: $e",
-  //             );
-  //           }
-  //         }
-  //         return true;
-  //       } else {
-  //         return false;
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print("addRemote exception items_id=${model.itemsId}: $e");
-  //     }
-  //     return false;
-  //   }
-  // }
-
-  // ----------------- Core sync for category -----------------
-  // Important: we first PUSH local newer items (or local-only) to server,
-  // then FETCH server list and apply remote->local updates for items that are newer on server.
   Future<void> upgradeItemsForCategory(int categoryId) async {
     try {
       // 0) Build maps
@@ -363,15 +281,6 @@ class ItemsControllerImp extends ItemsController {
       var stRemote = handlingData(remoteResponse);
       if (stRemote != StatusRequest.success ||
           remoteResponse['status'] != "success") {
-        // If remote fetch failed, we still may attempt to push local-only items (best-effort)
-        // push local-only items:
-        // for (var localEntry in localMap.entries) {
-        //   final localItem = localEntry.value;
-        //   // if no remote id or remote not reachable, try to add (best-effort)
-        //   if (localItem.itemsId == null) {
-        //     await _addRemote(localItem);
-        //   }
-        // }
         return;
       }
 
@@ -396,10 +305,6 @@ class ItemsControllerImp extends ItemsController {
             }
           }
         }
-        //  else {
-        //   // local exists but remote missing -> add via addupgrade/add
-        //   bool _ = await _addRemote(localItem);
-        // }
       }
 
       // 3) Then: iterate remoteMap and merge remote -> local for items that are newer or local-missing

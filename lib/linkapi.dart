@@ -42,4 +42,7 @@ class AppLink {
   static const String incomingInvoicesAdd = "$server/incomingInvoices/add.php";
   static const String incomingInvoicesview =
       "$server/incomingInvoices/view.php";
+
+  static const String issuedinvoicesAdd = "$server/issuedinvoices/add.php";
+  static const String issuedinvoicesview = "$server/issuedinvoices/view.php";
 }

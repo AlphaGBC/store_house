@@ -152,6 +152,32 @@ CREATE TABLE incoming_invoice_items (
 )
 ''');
 
+    batch.execute('''
+CREATE TABLE issued_invoices (
+  issued_invoices_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  supplier_name TEXT NOT NULL,
+  issued_invoices_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status TEXT NOT NULL DEFAULT 'open'
+)
+''');
+
+    batch.execute('''
+CREATE TABLE issued_invoices_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  issued_invoices_id INTEGER NOT NULL,
+  items_id INTEGER NOT NULL,
+  items_name TEXT NOT NULL,
+  storehouse_count INTEGER,
+  pos1_count INTEGER,
+  pos2_count INTEGER,
+  cost_price NUMERIC,
+  wholesale_price NUMERIC,
+  retail_price NUMERIC,
+  wholesale_discount NUMERIC,
+  retail_discount NUMERIC
+)
+''');
+
     await batch.commit();
 
     if (kDebugMode) {

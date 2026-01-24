@@ -24,11 +24,6 @@ class ItemsData {
     return response.fold((l) => l, (r) => r);
   }
 
-  // addupgrade(Map data) async {
-  //   var response = await crud.postData(AppLink.itemsddupgrade, data);
-  //   return response.fold((l) => l, (r) => r);
-  // }
-
   delete(Map data) async {
     var response = await crud.postData(AppLink.itemsdelete, data);
     return response.fold((l) => l, (r) => r);

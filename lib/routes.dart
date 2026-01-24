@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:store_house/SqfliteTest.dart';
 import 'package:store_house/core/middleware/mymiddleware.dart';
 import 'package:store_house/core/shared/categories_view_shared.dart';
 import 'package:store_house/view/screen/auth/login.dart';
@@ -8,6 +9,9 @@ import 'package:store_house/view/screen/categories/view.dart';
 import 'package:store_house/view/screen/home.dart';
 import 'package:store_house/view/screen/invoices/incoming_invoices.dart';
 import 'package:store_house/view/screen/invoices/incoming_invoices_add.dart';
+import 'package:store_house/view/screen/issued_invoices/issued_invoices.dart';
+import 'package:store_house/view/screen/issued_invoices/issued_invoices_add.dart';
+import 'package:store_house/view/screen/issued_invoices/issued_invoices_view.dart';
 import 'package:store_house/view/screen/items/add.dart';
 import 'package:store_house/view/screen/items/edit.dart';
 import 'package:store_house/view/screen/items/view.dart';
@@ -38,6 +42,11 @@ class AppRoute {
   static const String orderCardsPage = "/orderCardsPage";
   static const String incomingInvoices = "/incomingInvoices";
   static const String incomingInvoicesAdd = "/incomingInvoicesAdd";
+  static const String sqflitetest = "/sqflitetest";
+
+  static const String issuedInvoices = "/issuedInvoices";
+  static const String issuedInvoicesAdd = "/issuedInvoicesAdd";
+  static const String issuedInvoicesView = "/issuedInvoicesView";
 }
 
 List<GetPage<dynamic>>? routes = [
@@ -73,5 +82,17 @@ List<GetPage<dynamic>>? routes = [
   GetPage(
     name: AppRoute.incomingInvoicesAdd,
     page: () => const IncomingInvoicesAdd(),
+  ),
+
+  GetPage(name: AppRoute.sqflitetest, page: () => const Sqflitetest()),
+
+  GetPage(name: AppRoute.issuedInvoices, page: () => const IssuedInvoices()),
+  GetPage(
+    name: AppRoute.issuedInvoicesAdd,
+    page: () => const IssuedInvoicesAdd(),
+  ),
+  GetPage(
+    name: AppRoute.issuedInvoicesView,
+    page: () => const IssuedInvoicesView(),
   ),
 ];

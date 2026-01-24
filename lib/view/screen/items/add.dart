@@ -165,39 +165,39 @@ class ItemsAdd extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: customTextForm(
-                                  context,
-                                  "سعر الجملة",
-                                  "سعر الجملة",
-                                  Icon(Icons.price_check),
-                                  ctrl.wholesaleprice,
-                                  (val) => validInput(val!, 1, 30, ""),
-                                  keyboardType: TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: customTextForm(
-                                  context,
-                                  "سعر المفرق",
-                                  "سعر المفرق",
-                                  Icon(Icons.price_check),
-                                  ctrl.retailprice,
-                                  (val) => validInput(val!, 1, 30, ""),
-                                  keyboardType: TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
 
+                          // SizedBox(height: 12),
+                          // Row(
+                          //   children: [
+                          //     Expanded(
+                          //       child: customTextForm(
+                          //         context,
+                          //         "سعر الجملة",
+                          //         "سعر الجملة",
+                          //         Icon(Icons.price_check),
+                          //         ctrl.wholesaleprice,
+                          //         (val) => validInput(val!, 1, 30, ""),
+                          //         keyboardType: TextInputType.numberWithOptions(
+                          //           decimal: true,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     SizedBox(width: 12),
+                          //     Expanded(
+                          //       child: customTextForm(
+                          //         context,
+                          //         "سعر المفرق",
+                          //         "سعر المفرق",
+                          //         Icon(Icons.price_check),
+                          //         ctrl.retailprice,
+                          //         (val) => validInput(val!, 1, 30, ""),
+                          //         keyboardType: TextInputType.numberWithOptions(
+                          //           decimal: true,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                           SizedBox(height: 12),
 
                           customTextForm(

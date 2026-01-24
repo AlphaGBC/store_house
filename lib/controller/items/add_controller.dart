@@ -18,8 +18,6 @@ class ItemsAddController extends GetxController {
   late TextEditingController pointofsale1count;
   late TextEditingController pointofsale2count;
   late TextEditingController costprice;
-  late TextEditingController wholesaleprice;
-  late TextEditingController retailprice;
   late TextEditingController wholesalediscount;
   late TextEditingController retaildiscount;
   late TextEditingController itemsQr;
@@ -56,8 +54,10 @@ class ItemsAddController extends GetxController {
         "pointofsale1count": pointofsale1count.text,
         "pointofsale2count": pointofsale2count.text,
         "costprice": costprice.text,
-        "wholesaleprice": wholesaleprice.text,
-        "retailprice": retailprice.text,
+        "wholesaleprice":
+            "${double.parse(costprice.text) + double.parse(costprice.text) * 10 / 100}",
+        "retailprice":
+            "${double.parse(costprice.text) + double.parse(costprice.text) * 25 / 100}",
         "wholesalediscount": wholesalediscount.text,
         "retaildiscount": retaildiscount.text,
         "items_categories": catid!.toString(),
@@ -92,8 +92,6 @@ class ItemsAddController extends GetxController {
     pointofsale1count = TextEditingController();
     pointofsale2count = TextEditingController();
     costprice = TextEditingController();
-    wholesaleprice = TextEditingController();
-    retailprice = TextEditingController();
     wholesalediscount = TextEditingController();
     retaildiscount = TextEditingController();
     itemsQr = TextEditingController();
