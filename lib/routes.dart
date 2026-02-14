@@ -7,6 +7,7 @@ import 'package:store_house/view/screen/categories/edit.dart';
 import 'package:store_house/view/screen/categories/view.dart';
 import 'package:store_house/view/screen/home.dart';
 import 'package:store_house/view/screen/incoming_invoices/incoming_invoices.dart';
+import 'package:store_house/view/screen/incoming_invoices/incoming_invoices_add.dart';
 import 'package:store_house/view/screen/items/add.dart';
 import 'package:store_house/view/screen/items/edit.dart';
 import 'package:store_house/view/screen/items/item_movement.dart';
@@ -82,6 +83,10 @@ List<GetPage<dynamic>>? routes = [
   GetPage(
     name: AppRoute.incomingInvoices,
     page: () => const IncomingInvoices(),
+  ),
+  GetPage(
+    name: AppRoute.incomingInvoicesAdd,
+    page: () => const IncomingInvoicesAdd(),
   ),
 
   GetPage(name: AppRoute.itemMovement, page: () => const ItemMovementView()),

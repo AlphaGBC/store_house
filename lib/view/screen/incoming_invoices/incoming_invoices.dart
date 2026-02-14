@@ -4,6 +4,7 @@ import 'package:store_house/controller/incoming_invoices/view_controller.dart';
 import 'package:store_house/core/class/handlingdataview.dart';
 import 'package:store_house/core/constant/color.dart';
 import 'package:store_house/core/functions/refresh_wrapper.dart';
+import 'package:store_house/routes.dart';
 
 class IncomingInvoices extends StatefulWidget {
   const IncomingInvoices({super.key});
@@ -15,16 +16,13 @@ class IncomingInvoices extends StatefulWidget {
 class _IncomingInvoicesState extends State<IncomingInvoices> {
   @override
   Widget build(BuildContext context) {
-    final IncomingInvoicesController controller = Get.put(
-      IncomingInvoicesController(),
-    );
+    Get.put(IncomingInvoicesController());
     return Scaffold(
       appBar: AppBar(title: const Text("فواتير الادخال"), centerTitle: true),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.primaryColor,
         onPressed: () {
-          // controller.openInvoice(); // فتح فاتورة جديدة
-          // Get.toNamed(AppRoute.incomingInvoicesAdd);
+          Get.toNamed(AppRoute.incomingInvoicesAdd);
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),
