@@ -11,7 +11,7 @@ class IncomingInvoicesData {
   }
 
   Future add(Map data) async {
-    var response = await crud.postData(AppLink.incomingInvoicesview, data);
+    var response = await crud.postData(AppLink.incomingInvoicesAdd, data);
     return response.fold((l) => l, (r) => r);
   }
 }
