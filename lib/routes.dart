@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:store_house/SqfliteTest.dart';
 import 'package:store_house/core/middleware/mymiddleware.dart';
 import 'package:store_house/core/shared/categories_view_shared.dart';
 import 'package:store_house/view/screen/auth/login.dart';
@@ -7,16 +6,15 @@ import 'package:store_house/view/screen/categories/add.dart';
 import 'package:store_house/view/screen/categories/edit.dart';
 import 'package:store_house/view/screen/categories/view.dart';
 import 'package:store_house/view/screen/home.dart';
-import 'package:store_house/view/screen/invoices/incoming_invoices.dart';
-import 'package:store_house/view/screen/invoices/incoming_invoices_add.dart';
-import 'package:store_house/view/screen/issued_invoices/issued_invoices.dart';
-import 'package:store_house/view/screen/issued_invoices/issued_invoices_add.dart';
-import 'package:store_house/view/screen/issued_invoices/issued_invoices_view.dart';
+import 'package:store_house/view/screen/incoming_invoices/incoming_invoices.dart';
 import 'package:store_house/view/screen/items/add.dart';
 import 'package:store_house/view/screen/items/edit.dart';
+import 'package:store_house/view/screen/items/item_movement.dart';
 import 'package:store_house/view/screen/items/view.dart';
 import 'package:store_house/view/screen/order_page.dart';
 import 'package:store_house/view/screen/scan_product_qr.dart';
+import 'package:store_house/view/screen/supplier/supplier_add.dart';
+import 'package:store_house/view/screen/supplier/supplier_view.dart';
 import 'package:store_house/view/screen/usd/usd_edit.dart';
 import 'package:store_house/view/screen/usd/usd_view.dart';
 import 'package:store_house/view/screen/wholesale/wholesale_add.dart';
@@ -39,14 +37,17 @@ class AppRoute {
   static const String wholesaleView = "/wholesaleView";
   static const String wholesaleAdd = "/wholesaleAdd";
 
+  static const String supplierView = "/supplierView";
+  static const String supplierAdd = "/supplierAdd";
+
   static const String orderCardsPage = "/orderCardsPage";
   static const String incomingInvoices = "/incomingInvoices";
   static const String incomingInvoicesAdd = "/incomingInvoicesAdd";
-  static const String sqflitetest = "/sqflitetest";
 
   static const String issuedInvoices = "/issuedInvoices";
   static const String issuedInvoicesAdd = "/issuedInvoicesAdd";
   static const String issuedInvoicesView = "/issuedInvoicesView";
+  static const String itemMovement = "/itemMovement";
 }
 
 List<GetPage<dynamic>>? routes = [
@@ -74,25 +75,14 @@ List<GetPage<dynamic>>? routes = [
   GetPage(name: AppRoute.wholesaleView, page: () => const WholesaleView()),
   GetPage(name: AppRoute.wholesaleAdd, page: () => const WholesaleAdd()),
 
+  GetPage(name: AppRoute.supplierView, page: () => const SupplierView()),
+  GetPage(name: AppRoute.supplierAdd, page: () => const SupplierAdd()),
+
   GetPage(name: AppRoute.orderCardsPage, page: () => const OrderCardsPage()),
   GetPage(
     name: AppRoute.incomingInvoices,
     page: () => const IncomingInvoices(),
   ),
-  GetPage(
-    name: AppRoute.incomingInvoicesAdd,
-    page: () => const IncomingInvoicesAdd(),
-  ),
 
-  GetPage(name: AppRoute.sqflitetest, page: () => const Sqflitetest()),
-
-  GetPage(name: AppRoute.issuedInvoices, page: () => const IssuedInvoices()),
-  GetPage(
-    name: AppRoute.issuedInvoicesAdd,
-    page: () => const IssuedInvoicesAdd(),
-  ),
-  GetPage(
-    name: AppRoute.issuedInvoicesView,
-    page: () => const IssuedInvoicesView(),
-  ),
+  GetPage(name: AppRoute.itemMovement, page: () => const ItemMovementView()),
 ];

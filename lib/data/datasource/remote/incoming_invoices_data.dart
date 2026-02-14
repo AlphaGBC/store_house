@@ -1,61 +1,17 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import 'package:store_house/core/class/crud.dart';
 import 'package:store_house/linkapi.dart';
 
 class IncomingInvoicesData {
-  // 1. دالة الرفع (POST) - ترسل JSON خام
-  Future<dynamic> uploadInvoice(Map data) async {
-    try {
-      if (kDebugMode) print("Sending POST to: ${AppLink.incomingInvoicesAdd}");
-      String body = jsonEncode(data);
+  Crud crud;
+  IncomingInvoicesData(this.crud);
 
-      var response = await http
-          .post(
-            Uri.parse(AppLink.incomingInvoicesAdd),
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-            },
-            body: body,
-          )
-          .timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        return {
-          "status": "failure",
-          "message": "Server Error: ${response.statusCode}",
-        };
-      }
-    } catch (e) {
-      return {"status": "failure", "message": "Connection Error: $e"};
-    }
+  Future view() async {
+    var response = await crud.postData(AppLink.incomingInvoicesview, {});
+    return response.fold((l) => l, (r) => r);
   }
 
-  // 2. دالة الجلب (GET) - تجلب البيانات من السيرفر
-  Future<dynamic> viewInvoices() async {
-    try {
-      if (kDebugMode) print("Sending GET to: ${AppLink.incomingInvoicesview}");
-
-      var response = await http
-          .get(
-            Uri.parse(AppLink.incomingInvoicesview),
-            headers: {"Accept": "application/json"},
-          )
-          .timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {
-          "status": "failure",
-          "message": "Server Error: ${response.statusCode}",
-        };
-      }
-    } catch (e) {
-      return {"status": "failure", "message": "Connection Error: $e"};
-    }
+  Future add(Map data) async {
+    var response = await crud.postData(AppLink.incomingInvoicesview, data);
+    return response.fold((l) => l, (r) => r);
   }
 }

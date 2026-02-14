@@ -33,8 +33,7 @@ class ItemsView extends StatelessWidget {
             (controller) => RefreshWrapper(
               onRefresh:
                   () => controller.getItemsByCategories(
-                    controller.selectedCat!,
-                    forceRefresh: true,
+                    int.parse(controller.catid!),
                   ),
               child: HandlingDataView(
                 statusRequest: controller.statusRequest,

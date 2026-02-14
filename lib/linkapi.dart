@@ -37,6 +37,10 @@ class AppLink {
   static const String wholesaleadd = "$server/wholesale/add.php";
   static const String wholesaledelete = "$server/wholesale/delete.php";
 
+  static const String supplierview = "$server/supplier/view.php";
+  static const String supplieradd = "$server/supplier/add.php";
+  static const String supplierdelete = "$server/supplier/delete.php";
+
   static const String vieworder = "$server/order/view.php";
 
   static const String incomingInvoicesAdd = "$server/incomingInvoices/add.php";

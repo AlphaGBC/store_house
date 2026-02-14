@@ -6,7 +6,7 @@ ThemeData themeArabic = ThemeData(
     backgroundColor: AppColor.white,
   ),
   cardColor: AppColor.white,
-  cardTheme: CardTheme(color: AppColor.white),
+  cardTheme: CardThemeData(color: AppColor.white),
   scaffoldBackgroundColor: AppColor.white,
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     backgroundColor: AppColor.primaryColor,

@@ -25,8 +25,6 @@ class ItemsControllerImp extends ItemsController {
 
   StatusRequest statusRequest = StatusRequest.none;
 
-  int? _lastSubcategoriesId;
-
   SqlDb sqlDb = SqlDb();
 
   // الفرق: السيرفر أقدم بـ 3 ساعات — نستخدم هذا للتعديل والتحويل.
@@ -130,50 +128,6 @@ class ItemsControllerImp extends ItemsController {
     }
     return m;
   }
-
-  // ----------------- Local upsert (from remote) -----------------
-
-  // Future<void> _upsertLocal(ItemsModel model) async {
-  //   try {
-  //     final rows = await _readLocalRows(model.itemsCategories ?? 0);
-  //     final idStr = model.itemsId.toString();
-  //     final exists = rows.any((r) => (r['items_id'] ?? '').toString() == idStr);
-
-  //     final values = {
-  //       "items_id": model.itemsId,
-  //       "items_name": model.itemsName,
-  //       "items_storehouse_count": model.itemsStorehouseCount ?? 0,
-  //       "items_pointofsale1_count": model.itemsPointofsale1Count ?? 0,
-  //       "items_pointofsale2_count": model.itemsPointofsale2Count ?? 0,
-  //       "items_cost_price": model.itemsCostPrice,
-  //       "items_wholesale_price": model.itemsWholesalePrice,
-  //       "items_retail_price": model.itemsRetailPrice,
-  //       "items_wholesale_discount": model.itemsWholesaleDiscount,
-  //       "items_retail_discount": model.itemsRetailDiscount,
-  //       "items_qr": model.itemsQr,
-  //       "items_categories": model.itemsCategories,
-  //       "items_date": model.itemsDate,
-  //       "categories_id": model.categoriesId,
-  //       "categories_name": model.categoriesName,
-  //       "categories_image": model.categoriesImage,
-  //       "categories_date": model.categoriesDate,
-  //       "itemswholesalepricediscount": model.itemswholesalepricediscount,
-  //       "itemsretailpricediscount": model.itemsretailpricediscount,
-  //     };
-
-  //     if (exists) {
-  //       await sqlDb.update("itemsview", values, "items_id = $idStr");
-  //       //print("Local updated item id=$idStr");
-  //     } else {
-  //       await sqlDb.insert("itemsview", values);
-  //       //print("Local inserted item id=$idStr");
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print("upsertLocal items error id=${model.itemsId}: $e");
-  //     }
-  //   }
-  // }
 
   Future<void> _upsertLocal(ItemsModel model) async {
     final db = await sqlDb.db;
@@ -348,48 +302,48 @@ class ItemsControllerImp extends ItemsController {
     }
   }
 
-  // ----------------- Public API -----------------
-  getItemsByCategories(int catid, {bool forceRefresh = false}) async {
-    if (_lastSubcategoriesId == catid && !forceRefresh) return;
-    _lastSubcategoriesId = catid;
-
+  getItemsByCategories(int catid) async {
     data.clear();
     statusRequest = StatusRequest.loading;
     update();
 
-    // 1) show local immediately (offline-first)
+    // 1) show local
     try {
       final localRows = await _readLocalRows(catid);
-      data = localRows.map((e) => ItemsModel.fromJson(e)).toList();
+      data =
+          localRows
+              .map((e) => ItemsModel.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
       statusRequest = StatusRequest.success;
       update();
     } catch (e) {
       if (kDebugMode) {
-        print("getItemsByCategories read local error: $e");
+        print("getview - read local error: $e");
       }
       statusRequest = StatusRequest.failure;
       update();
-      return;
     }
 
-    // 2) sync (push local newer first, then merge remote)
+    // 2) sync (compare dates & delete missing) — this will insert remote-only items into local
     try {
-      await upgradeItemsForCategory(catid);
+      await upgradeItemsForCategory(int.parse(catid.toString()));
     } catch (e) {
       if (kDebugMode) {
-        print("getItemsByCategories upgradeItems failed: $e");
+        print("getview - upgradeItemsForCategory failed: $e");
       }
     }
 
-    // 3) reload local after sync
+    // 3) reload local and update UI
     try {
-      final refreshedRows = await _readLocalRows(catid);
-      data = refreshedRows.map((e) => ItemsModel.fromJson(e)).toList();
-      statusRequest = StatusRequest.success;
+      final refreshed = await _readLocalRows(catid);
+      data =
+          refreshed
+              .map((e) => ItemsModel.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
       update();
     } catch (e) {
       if (kDebugMode) {
-        print("getItemsByCategories final read error: $e");
+        print("getview - final reload error: $e");
       }
     }
   }

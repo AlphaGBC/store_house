@@ -15,7 +15,7 @@ class SqlDb {
     }
   }
 
-  intialDb() async {
+  Future<Database> intialDb() async {
     String databasepath = await getDatabasesPath();
 
     String path = join(databasepath, 'MaherStore.db');
@@ -30,13 +30,13 @@ class SqlDb {
     return mydb;
   }
 
-  _onUpgrade(Database db, int oldversion, int newversion) async {
+  Future<void> _onUpgrade(Database db, int oldversion, int newversion) async {
     if (kDebugMode) {
       print("onUpgrade =====================================");
     }
   }
 
-  _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int version) async {
     Batch batch = db.batch();
 
     batch.execute('''
@@ -107,7 +107,6 @@ CREATE TABLE orders (
 )
 ''');
 
-    // Order items table: stores each item belonging to an order
     batch.execute('''
 CREATE TABLE order_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -127,54 +126,30 @@ CREATE TABLE order_items (
 ''');
 
     batch.execute('''
-CREATE TABLE incoming_invoices (
-  invoice_id INTEGER PRIMARY KEY AUTOINCREMENT,
-  supplier_name TEXT NOT NULL,
-  invoice_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status TEXT NOT NULL DEFAULT 'open'
-)
-''');
-
-    batch.execute('''
-CREATE TABLE incoming_invoice_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  invoice_id INTEGER NOT NULL,
-  items_id INTEGER NOT NULL,
-  items_name TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS incoming_invoice_itemsview (
+  incoming_invoice_items_id INTEGER,
+  items_invoice_id INTEGER,
+  items_supplier_id INTEGER,
+  incoming_invoice_items_items_id INTEGER,
   storehouse_count INTEGER,
   pos1_count INTEGER,
   pos2_count INTEGER,
-  cost_price NUMERIC,
-  wholesale_price NUMERIC,
-  retail_price NUMERIC,
-  wholesale_discount NUMERIC,
-  retail_discount NUMERIC
-)
-''');
+  cost_price REAL,
+  incoming_invoice_items_note TEXT,
+  invoice_id INTEGER,
+  invoice_date TEXT,
+  supplier_id INTEGER,
+  supplier_name TEXT,
+  supplier_date TEXT,
+  items_name TEXT
+);
+    ''');
 
     batch.execute('''
-CREATE TABLE issued_invoices (
-  issued_invoices_id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE supplier (
+  supplier_id INTEGER PRIMARY KEY,
   supplier_name TEXT NOT NULL,
-  issued_invoices_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status TEXT NOT NULL DEFAULT 'open'
-)
-''');
-
-    batch.execute('''
-CREATE TABLE issued_invoices_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  issued_invoices_id INTEGER NOT NULL,
-  items_id INTEGER NOT NULL,
-  items_name TEXT NOT NULL,
-  storehouse_count INTEGER,
-  pos1_count INTEGER,
-  pos2_count INTEGER,
-  cost_price NUMERIC,
-  wholesale_price NUMERIC,
-  retail_price NUMERIC,
-  wholesale_discount NUMERIC,
-  retail_discount NUMERIC
+  supplier_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 ''');
 
@@ -185,7 +160,7 @@ CREATE TABLE issued_invoices_items (
     }
   }
 
-  read(String table) async {
+  Future<List<Map<dynamic, dynamic>>> read(String table) async {
     Database? mydb = await db;
 
     List<Map> response = await mydb!.query(table);
@@ -193,7 +168,7 @@ CREATE TABLE issued_invoices_items (
     return response;
   }
 
-  insert(String table, Map<String, Object?> values) async {
+  Future<int> insert(String table, Map<String, Object?> values) async {
     Database? mydb = await db;
 
     int response = await mydb!.insert(table, values);
@@ -201,7 +176,11 @@ CREATE TABLE issued_invoices_items (
     return response;
   }
 
-  update(String table, Map<String, Object?> values, String? mywhere) async {
+  Future<int> update(
+    String table,
+    Map<String, Object?> values,
+    String? mywhere,
+  ) async {
     Database? mydb = await db;
 
     int response = await mydb!.update(table, values, where: mywhere);
@@ -209,7 +188,7 @@ CREATE TABLE issued_invoices_items (
     return response;
   }
 
-  delete(String table, String? mywhere) async {
+  Future<int> delete(String table, String? mywhere) async {
     Database? mydb = await db;
 
     int response = await mydb!.delete(table, where: mywhere);
@@ -217,7 +196,7 @@ CREATE TABLE issued_invoices_items (
     return response;
   }
 
-  mydeleteDatabase() async {
+  Future<void> mydeleteDatabase() async {
     String databasepath = await getDatabasesPath();
     String path = join(databasepath, 'MaherStore.db');
     await deleteDatabase(path);

@@ -70,7 +70,7 @@ class ItemsAddController extends GetxController {
         if (response['status'] == "success") {
           Get.back();
           ItemsControllerImp c = Get.find();
-          c.getItemsByCategories(catid!, forceRefresh: true);
+          c.getItemsByCategories(catid!);
         } else {
           FancySnackbar.show(
             title: "خطأ",

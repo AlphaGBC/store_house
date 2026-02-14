@@ -158,7 +158,7 @@ class ItemsEditController extends GetxController {
     Get.offAllNamed(AppRoute.homepage);
     ItemsControllerImp c = Get.find();
     if (catid != null) {
-      c.getItemsByCategories(catid!, forceRefresh: true);
+      c.getItemsByCategories(catid!);
     }
 
     if (!ok) {
