@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/core/class/statusrequest.dart';
+import 'package:store_house/core/functions/handingdatacontroller.dart';
+import 'package:store_house/data/datasource/remote/incoming_invoices_data.dart';
 import 'package:store_house/data/model/itemsmodel.dart';
 import 'package:store_house/data/model/supplier_model.dart';
 import 'package:store_house/sqflite.dart';
 
 class IncomingInvoicesAddController extends GetxController {
   SqlDb sqlDb = SqlDb();
+  IncomingInvoicesData incomingInvoicesData = IncomingInvoicesData(Get.find());
   StatusRequest statusRequest = StatusRequest.none;
 
   List<ItemsModel> allItems = [];
@@ -127,12 +130,13 @@ class IncomingInvoicesAddController extends GetxController {
     update();
 
     try {
-      // Generate a unique invoice ID and date for this batch
+      // 1. Prepare data for local storage and server
       int invoiceId = DateTime.now().millisecondsSinceEpoch;
       String invoiceDate = DateTime.now().toString();
 
+      List<Map<String, dynamic>> serverItems = [];
+
       for (var item in selectedInvoiceItems) {
-        // Validation
         if (item["supplier_id"] == null) {
           Get.snackbar("خطأ", "يرجى اختيار مورد للعنصر: ${item["items_name"]}");
           statusRequest = StatusRequest.success;
@@ -140,17 +144,21 @@ class IncomingInvoicesAddController extends GetxController {
           return;
         }
 
+        double costPrice = double.tryParse(item["cost_price"].text) ?? 0.0;
+        int sCount = int.tryParse(item["storehouse_count"].text) ?? 0;
+        int p1Count = int.tryParse(item["pos1_count"].text) ?? 0;
+        int p2Count = int.tryParse(item["pos2_count"].text) ?? 0;
+
+        // Local row
         Map<String, Object?> row = {
-          "incoming_invoice_items_id":
-              DateTime.now()
-                  .microsecondsSinceEpoch, // Unique ID for the item entry
+          "incoming_invoice_items_id": DateTime.now().microsecondsSinceEpoch,
           "items_invoice_id": invoiceId,
           "items_supplier_id": item["supplier_id"],
           "incoming_invoice_items_items_id": item["items_id"],
-          "storehouse_count": int.tryParse(item["storehouse_count"].text) ?? 0,
-          "pos1_count": int.tryParse(item["pos1_count"].text) ?? 0,
-          "pos2_count": int.tryParse(item["pos2_count"].text) ?? 0,
-          "cost_price": double.tryParse(item["cost_price"].text) ?? 0.0,
+          "storehouse_count": sCount,
+          "pos1_count": p1Count,
+          "pos2_count": p2Count,
+          "cost_price": costPrice,
           "incoming_invoice_items_note": item["note"].text,
           "invoice_id": invoiceId,
           "invoice_date": invoiceDate,
@@ -161,10 +169,43 @@ class IncomingInvoicesAddController extends GetxController {
         };
 
         await sqlDb.insert("incoming_invoice_itemsview", row);
+
+        // Server item
+        serverItems.add({
+          "items_id": item["items_id"],
+          "supplier_id": item["supplier_id"],
+          "storehouse_count": sCount,
+          "pos1_count": p1Count,
+          "pos2_count": p2Count,
+          "cost_price": costPrice,
+          "note": item["note"].text,
+        });
       }
 
-      Get.snackbar("نجاح", "تم حفظ الفاتورة محلياً بنجاح");
-      Get.back(); // Return to previous page
+      // 2. Upload to server
+      var response = await incomingInvoicesData.add({
+        "invoice_date": invoiceDate,
+        "items": serverItems,
+      });
+
+      statusRequest = handlingData(response);
+
+      if (StatusRequest.success == statusRequest) {
+        if (response['status'] == "success") {
+          Get.snackbar("نجاح", "تم حفظ الفاتورة محلياً ورفعها للسيرفر بنجاح");
+          Get.back();
+        } else {
+          Get.snackbar(
+            "تنبيه",
+            "تم الحفظ محلياً ولكن فشل الرفع للسيرفر: ${response['message']}",
+          );
+        }
+      } else {
+        Get.snackbar(
+          "تنبيه",
+          "تم الحفظ محلياً ولكن تعذر الاتصال بالسيرفر للرفع",
+        );
+      }
     } catch (e) {
       print("Error saving invoice: $e");
       Get.snackbar("خطأ", "حدث خطأ أثناء الحفظ");

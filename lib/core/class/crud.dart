@@ -62,6 +62,38 @@ class Crud {
     return const Left(StatusRequest.serverfailure);
   }
 
+  Future<Either<StatusRequest, Map>> postJsonData(
+    String linkurl,
+    Map data,
+  ) async {
+    if (!await checkInternet()) {
+      return const Left(StatusRequest.offlinefailure);
+    }
+
+    for (int i = 0; i < maxRetries; i++) {
+      try {
+        var response = await http
+            .post(
+              Uri.parse(linkurl),
+              body: jsonEncode(data),
+              headers: {..._myheaders, "Content-Type": "application/json"},
+            )
+            .timeout(const Duration(seconds: 30));
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          Map responsebody = jsonDecode(response.body);
+          return Right(responsebody);
+        } else {
+          return const Left(StatusRequest.serverfailure);
+        }
+      } catch (e) {
+        await Future.delayed(retryDelay);
+      }
+    }
+
+    return const Left(StatusRequest.serverfailure);
+  }
+
   Future<Either<StatusRequest, Map>> addRequestWithImageOne(
     String url,
     Map data,
