@@ -94,13 +94,13 @@ class HomePage extends StatelessWidget {
                                     url: AppImageAsset.logo,
                                     title: "فواتير الادخال",
                                   ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.issuedInvoices);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الفواتير الصادرة",
-                                  ),
+                                  // Cardadmin(
+                                  //   onTap: () {
+                                  //     Get.toNamed(AppRoute.issuedInvoices);
+                                  //   },
+                                  //   url: AppImageAsset.logo,
+                                  //   title: "الفواتير الصادرة",
+                                  // ),
                                   Cardadmin(
                                     onTap: () {
                                       Get.toNamed(AppRoute.itemMovement);

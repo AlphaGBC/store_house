@@ -14,4 +14,9 @@ class IncomingInvoicesData {
     var response = await crud.postJsonData(AppLink.incomingInvoicesAdd, data);
     return response.fold((l) => l, (r) => r);
   }
+
+  Future edit(Map data) async {
+    var response = await crud.postJsonData(AppLink.incomingInvoicesEdit, data);
+    return response.fold((l) => l, (r) => r);
+  }
 }

@@ -6,24 +6,42 @@ import 'package:store_house/core/constant/color.dart';
 import 'package:store_house/core/functions/refresh_wrapper.dart';
 import 'package:store_house/routes.dart';
 
-class IncomingInvoices extends StatefulWidget {
+class IncomingInvoices extends StatelessWidget {
   const IncomingInvoices({super.key});
 
   @override
-  State<IncomingInvoices> createState() => _IncomingInvoicesState();
-}
-
-class _IncomingInvoicesState extends State<IncomingInvoices> {
-  @override
   Widget build(BuildContext context) {
-    Get.put(IncomingInvoicesController());
+    final IncomingInvoicesController controller = Get.put(
+      IncomingInvoicesController(),
+    );
+
     return Scaffold(
-      appBar: AppBar(title: const Text("فواتير الادخال"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text("فواتير الإدخال"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: () async {
+              DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: controller.selectedDate ?? DateTime.now(),
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+              );
+              controller.setFilterDate(picked);
+            },
+          ),
+          if (controller.selectedDate != null)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () => controller.clearFilter(),
+            ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.primaryColor,
-        onPressed: () {
-          Get.toNamed(AppRoute.incomingInvoicesAdd);
-        },
+        onPressed: () => Get.toNamed(AppRoute.incomingInvoicesAdd),
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: GetBuilder<IncomingInvoicesController>(
@@ -38,17 +56,20 @@ class _IncomingInvoicesState extends State<IncomingInvoices> {
                     vertical: 10,
                   ),
                   child: ListView.separated(
-                    itemCount: controller.data.length,
-                    separatorBuilder: (_, _) => SizedBox(height: 14),
+                    itemCount: controller.filteredData.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 14),
                     itemBuilder: (context, index) {
-                      final item = controller.data[index];
+                      final item = controller.filteredData[index];
 
                       return GestureDetector(
-                        onTap: () {},
-                        // => controller.goToPageEdit(item),
+                        onTap: () {
+                          Get.toNamed(
+                            AppRoute.incomingInvoicesDetails,
+                            arguments: {"model": item},
+                          );
+                        },
                         child: Card(
                           elevation: 2,
-                          margin: const EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -71,46 +92,22 @@ class _IncomingInvoicesState extends State<IncomingInvoices> {
                               ),
                             ),
                             title: Text(
-                              item.supplierName ?? "مورد غير معروف",
+                              "رقم الفاتورة: ${item.invoiceId}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "التاريخ: ${item.invoiceDate ?? "غير معروف"}",
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.cloud_done,
-                                        color: Colors.green,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        "تم الرفع",
-                                        style: TextStyle(
-                                          color: Colors.green,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "المورد: ${item.supplierName ?? "غير معروف"}",
+                                ),
+                                Text(
+                                  "التاريخ: ${item.invoiceDate?.split(' ')[0] ?? "غير معروف"}",
+                                ),
+                              ],
                             ),
                             trailing: IconButton(
                               icon: const Icon(
@@ -118,11 +115,10 @@ class _IncomingInvoicesState extends State<IncomingInvoices> {
                                 color: Colors.blue,
                               ),
                               onPressed: () {
-                                // controller.openInvoice(
-                                //   id: invoice['invoice_id'],
-                                //   name: invoice['supplier_name'],
-                                // );
-                                // Get.toNamed("/incomingInvoicesAdd");
+                                Get.toNamed(
+                                  AppRoute.incomingInvoicesEdit,
+                                  arguments: {"model": item},
+                                );
                               },
                             ),
                           ),

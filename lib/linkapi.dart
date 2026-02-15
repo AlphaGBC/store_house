@@ -44,6 +44,9 @@ class AppLink {
   static const String vieworder = "$server/order/view.php";
 
   static const String incomingInvoicesAdd = "$server/incomingInvoices/add.php";
+  static const String incomingInvoicesEdit =
+      "$server/incomingInvoices/edit.php";
+
   static const String incomingInvoicesview =
       "$server/incomingInvoices/view.php";
 

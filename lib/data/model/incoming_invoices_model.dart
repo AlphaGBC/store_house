@@ -6,7 +6,7 @@ class IncomingInvoicesModel {
   int? storehouseCount;
   int? pos1Count;
   int? pos2Count;
-  String? costPrice;
+  dynamic costPrice;
   String? incomingInvoiceItemsNote;
   int? invoiceId;
   String? invoiceDate;
