@@ -13,7 +13,7 @@ class IncomingInvoicesEditController extends GetxController {
   StatusRequest statusRequest = StatusRequest.none;
 
   late IncomingInvoicesModel model;
-  
+
   late TextEditingController storehouseCount;
   late TextEditingController pos1Count;
   late TextEditingController pos2Count;
@@ -23,11 +23,13 @@ class IncomingInvoicesEditController extends GetxController {
   @override
   void onInit() {
     model = Get.arguments['model'];
-    storehouseCount = TextEditingController(text: model.storehouseCount.toString());
+    storehouseCount = TextEditingController(
+      text: model.storehouseCount.toString(),
+    );
     pos1Count = TextEditingController(text: model.pos1Count.toString());
     pos2Count = TextEditingController(text: model.pos2Count.toString());
     costPrice = TextEditingController(text: model.costPrice.toString());
-    note = TextEditingController(text: model.incomingInvoiceItemsNote);
+    note = TextEditingController(text: model.incomingInvoiceItemsNote ?? "");
     super.onInit();
   }
 
@@ -45,13 +47,11 @@ class IncomingInvoicesEditController extends GetxController {
       "note": note.text,
     };
 
-    // 1. Update Server
     var response = await incomingInvoicesData.edit(data);
     statusRequest = handlingData(response);
 
     if (StatusRequest.success == statusRequest) {
       if (response['status'] == "success") {
-        // 2. Update Local DB
         await sqlDb.update(
           "incoming_invoice_itemsview",
           {
@@ -61,17 +61,25 @@ class IncomingInvoicesEditController extends GetxController {
             "cost_price": data["cost_price"],
             "incoming_invoice_items_note": data["note"],
           },
-          "incoming_invoice_items_id = ${model.incomingInvoiceItemsId}"
+          "incoming_invoice_items_id = ${model.incomingInvoiceItemsId}",
         );
 
-        Get.snackbar("نجاح", "تم تعديل البيانات بنجاح");
-        
-        // Refresh View Controller and go back
-        IncomingInvoicesController c = Get.find();
-        c.getData();
-        Get.back();
+        Get.snackbar(
+          "نجاح",
+          "تم تعديل البيانات بنجاح",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        if (Get.isRegistered<IncomingInvoicesController>()) {
+          Get.find<IncomingInvoicesController>().getData();
+        }
+
+        Future.delayed(const Duration(seconds: 1), () {
+          Get.back();
+        });
       } else {
-        Get.snackbar("خطأ", "فشل التعديل على السيرفر");
+        Get.snackbar("خطأ", "فشل التعديل على السيرفر: ${response['message']}");
       }
     } else {
       Get.snackbar("خطأ", "تعذر الاتصال بالسيرفر");

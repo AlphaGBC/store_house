@@ -153,6 +153,21 @@ CREATE TABLE supplier (
 )
 ''');
 
+    batch.execute('''
+CREATE TABLE IF NOT EXISTS transfer_of_itemsview (
+  transfer_of_items_id INTEGER,
+  transfer_of_items_transfer_id INTEGER,
+  transfer_of_items_items_id INTEGER,
+  storehouse_count INTEGER,
+  pos1_count INTEGER,
+  pos2_count INTEGER,
+  transfer_of_items_note TEXT,
+  transfer_id INTEGER,
+  transfer_date TEXT,
+  items_name TEXT
+);
+''');
+
     await batch.commit();
 
     if (kDebugMode) {

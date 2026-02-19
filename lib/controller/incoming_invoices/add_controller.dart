@@ -6,6 +6,7 @@ import 'package:store_house/data/datasource/remote/incoming_invoices_data.dart';
 import 'package:store_house/data/model/itemsmodel.dart';
 import 'package:store_house/data/model/supplier_model.dart';
 import 'package:store_house/sqflite.dart';
+import 'view_controller.dart';
 
 class IncomingInvoicesAddController extends GetxController {
   SqlDb sqlDb = SqlDb();
@@ -19,7 +20,6 @@ class IncomingInvoicesAddController extends GetxController {
   List<SupplierModel> allSuppliers = [];
   List<SupplierModel> filteredSuppliers = [];
 
-  // List of items to be added to the invoice
   List<Map<String, dynamic>> selectedInvoiceItems = [];
 
   @override
@@ -31,21 +31,16 @@ class IncomingInvoicesAddController extends GetxController {
   loadLocalData() async {
     statusRequest = StatusRequest.loading;
     update();
-
-    // Load items from itemsview
     var itemsRes = await sqlDb.read("itemsview");
     allItems =
         itemsRes
             .map((e) => ItemsModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-
-    // Load suppliers from supplier
     var suppliersRes = await sqlDb.read("supplier");
     allSuppliers =
         suppliersRes
             .map((e) => SupplierModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-
     statusRequest = StatusRequest.success;
     update();
   }
@@ -81,7 +76,6 @@ class IncomingInvoicesAddController extends GetxController {
   }
 
   void selectItem(ItemsModel item) {
-    // Add a new entry for this item in the invoice
     selectedInvoiceItems.insert(0, {
       "items_id": item.itemsId,
       "items_name": item.itemsName,
@@ -98,7 +92,6 @@ class IncomingInvoicesAddController extends GetxController {
       "note": TextEditingController(),
       "show_supplier_suggestions": false,
     });
-
     searchItemController.clear();
     filteredItems = [];
     update();
@@ -130,10 +123,8 @@ class IncomingInvoicesAddController extends GetxController {
     update();
 
     try {
-      // 1. Prepare data for local storage and server
       int invoiceId = DateTime.now().millisecondsSinceEpoch;
       String invoiceDate = DateTime.now().toString();
-
       List<Map<String, dynamic>> serverItems = [];
 
       for (var item in selectedInvoiceItems) {
@@ -149,7 +140,6 @@ class IncomingInvoicesAddController extends GetxController {
         int p1Count = int.tryParse(item["pos1_count"].text) ?? 0;
         int p2Count = int.tryParse(item["pos2_count"].text) ?? 0;
 
-        // Local row
         Map<String, Object?> row = {
           "incoming_invoice_items_id": DateTime.now().microsecondsSinceEpoch,
           "items_invoice_id": invoiceId,
@@ -170,7 +160,6 @@ class IncomingInvoicesAddController extends GetxController {
 
         await sqlDb.insert("incoming_invoice_itemsview", row);
 
-        // Server item
         serverItems.add({
           "items_id": item["items_id"],
           "supplier_id": item["supplier_id"],
@@ -182,7 +171,6 @@ class IncomingInvoicesAddController extends GetxController {
         });
       }
 
-      // 2. Upload to server
       var response = await incomingInvoicesData.add({
         "invoice_date": invoiceDate,
         "items": serverItems,
@@ -192,8 +180,20 @@ class IncomingInvoicesAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
-          Get.snackbar("نجاح", "تم حفظ الفاتورة محلياً ورفعها للسيرفر بنجاح");
-          Get.back();
+          Get.snackbar(
+            "نجاح",
+            "تم حفظ الفاتورة بنجاح",
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+
+          if (Get.isRegistered<IncomingInvoicesController>()) {
+            Get.find<IncomingInvoicesController>().getData();
+          }
+
+          Future.delayed(const Duration(seconds: 1), () {
+            Get.back();
+          });
         } else {
           Get.snackbar(
             "تنبيه",

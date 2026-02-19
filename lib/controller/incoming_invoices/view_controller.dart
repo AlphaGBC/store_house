@@ -9,8 +9,9 @@ class IncomingInvoicesController extends GetxController {
   IncomingInvoicesData incomingInvoicesData = IncomingInvoicesData(Get.find());
   SqlDb sqlDb = SqlDb();
 
-  List<IncomingInvoicesModel> data = [];
-  List<IncomingInvoicesModel> filteredData = [];
+  List<IncomingInvoicesModel> allItems = [];
+  Map<int, List<IncomingInvoicesModel>> groupedInvoices = {};
+  List<int> invoiceIds = [];
 
   StatusRequest statusRequest = StatusRequest.none;
   DateTime? selectedDate;
@@ -25,10 +26,7 @@ class IncomingInvoicesController extends GetxController {
     statusRequest = StatusRequest.loading;
     update();
 
-    // 1. Load from Local Database first
     await getLocalData();
-
-    // 2. Try to sync with Server if online
     await syncWithServer();
 
     statusRequest = StatusRequest.success;
@@ -37,14 +35,42 @@ class IncomingInvoicesController extends GetxController {
 
   Future<void> getLocalData() async {
     var response = await sqlDb.read("incoming_invoice_itemsview");
-    data =
+    allItems =
         response
             .map(
               (e) =>
                   IncomingInvoicesModel.fromJson(Map<String, dynamic>.from(e)),
             )
             .toList();
-    applyFilter();
+    _groupAndFilter();
+  }
+
+  void _groupAndFilter() {
+    groupedInvoices.clear();
+    invoiceIds.clear();
+
+    for (var item in allItems) {
+      // Apply date filter if selected
+      if (selectedDate != null) {
+        String formattedDate =
+            "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
+        if (item.invoiceDate == null ||
+            !item.invoiceDate!.contains(formattedDate)) {
+          continue;
+        }
+      }
+
+      int id = item.invoiceId!;
+      if (!groupedInvoices.containsKey(id)) {
+        groupedInvoices[id] = [];
+        invoiceIds.add(id);
+      }
+      groupedInvoices[id]!.add(item);
+    }
+
+    // Sort invoice IDs descending (newest first)
+    invoiceIds.sort((a, b) => b.compareTo(a));
+    update();
   }
 
   Future<void> syncWithServer() async {
@@ -55,19 +81,13 @@ class IncomingInvoicesController extends GetxController {
       if (StatusRequest.success == serverStatus &&
           response['status'] == "success") {
         List datalist = response["data"];
-
-        // Clear local table and insert fresh data from server to keep it in sync
-        // Note: In a production app, you might want a more sophisticated sync (delta sync)
         await sqlDb.delete("incoming_invoice_itemsview", null);
-
         for (var item in datalist) {
           await sqlDb.insert(
             "incoming_invoice_itemsview",
             Map<String, Object?>.from(item),
           );
         }
-
-        // Reload local data after sync
         await getLocalData();
       }
     } catch (e) {
@@ -75,31 +95,13 @@ class IncomingInvoicesController extends GetxController {
     }
   }
 
-  void applyFilter() {
-    if (selectedDate == null) {
-      filteredData = List.from(data);
-    } else {
-      String formattedDate =
-          "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-      filteredData =
-          data
-              .where(
-                (item) =>
-                    item.invoiceDate != null &&
-                    item.invoiceDate!.contains(formattedDate),
-              )
-              .toList();
-    }
-    update();
-  }
-
   void setFilterDate(DateTime? date) {
     selectedDate = date;
-    applyFilter();
+    _groupAndFilter();
   }
 
   void clearFilter() {
     selectedDate = null;
-    applyFilter();
+    _groupAndFilter();
   }
 }

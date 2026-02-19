@@ -56,16 +56,18 @@ class IncomingInvoices extends StatelessWidget {
                     vertical: 10,
                   ),
                   child: ListView.separated(
-                    itemCount: controller.filteredData.length,
+                    itemCount: controller.invoiceIds.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 14),
                     itemBuilder: (context, index) {
-                      final item = controller.filteredData[index];
+                      final int invoiceId = controller.invoiceIds[index];
+                      final items = controller.groupedInvoices[invoiceId]!;
+                      final firstItem = items.first;
 
                       return GestureDetector(
                         onTap: () {
                           Get.toNamed(
                             AppRoute.incomingInvoicesDetails,
-                            arguments: {"model": item},
+                            arguments: {"items": items, "invoiceId": invoiceId},
                           );
                         },
                         child: Card(
@@ -92,7 +94,7 @@ class IncomingInvoices extends StatelessWidget {
                               ),
                             ),
                             title: Text(
-                              "رقم الفاتورة: ${item.invoiceId}",
+                              "رقم الفاتورة: $invoiceId",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -101,25 +103,16 @@ class IncomingInvoices extends StatelessWidget {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text("عدد العناصر: ${items.length}"),
                                 Text(
-                                  "المورد: ${item.supplierName ?? "غير معروف"}",
-                                ),
-                                Text(
-                                  "التاريخ: ${item.invoiceDate?.split(' ')[0] ?? "غير معروف"}",
+                                  "التاريخ: ${firstItem.invoiceDate?.split(' ')[0] ?? "غير معروف"}",
                                 ),
                               ],
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.edit_outlined,
-                                color: Colors.blue,
-                              ),
-                              onPressed: () {
-                                Get.toNamed(
-                                  AppRoute.incomingInvoicesEdit,
-                                  arguments: {"model": item},
-                                );
-                              },
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey,
                             ),
                           ),
                         ),
