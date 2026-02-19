@@ -110,6 +110,13 @@ class HomePage extends StatelessWidget {
                                   ),
                                   Cardadmin(
                                     onTap: () {
+                                      Get.toNamed(AppRoute.inventoryView);
+                                    },
+                                    url: AppImageAsset.logo,
+                                    title: "الجرد",
+                                  ),
+                                  Cardadmin(
+                                    onTap: () {
                                       Get.toNamed(AppRoute.scanProductQrPage);
                                     },
                                     url: AppImageAsset.logo,
@@ -135,6 +142,14 @@ class HomePage extends StatelessWidget {
                                     },
                                     url: AppImageAsset.logo,
                                     title: "الموردين",
+                                  ),
+
+                                  Cardadmin(
+                                    onTap: () {
+                                      Get.toNamed(AppRoute.revenueView);
+                                    },
+                                    url: AppImageAsset.logo,
+                                    title: "حساب الغلة",
                                   ),
                                 ],
                               ),

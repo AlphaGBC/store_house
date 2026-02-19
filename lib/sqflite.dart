@@ -168,6 +168,19 @@ CREATE TABLE IF NOT EXISTS transfer_of_itemsview (
 );
 ''');
 
+    batch.execute('''
+CREATE TABLE IF NOT EXISTS required_items (
+  items_id INTEGER PRIMARY KEY,
+  items_name TEXT,
+  items_storehouse_count INTEGER,
+  items_pointofsale1_count INTEGER,
+  items_pointofsale2_count INTEGER,
+  items_cost_price NUMERIC,
+  items_wholesale_price NUMERIC,
+  items_retail_price NUMERIC
+)
+''');
+
     await batch.commit();
 
     if (kDebugMode) {
