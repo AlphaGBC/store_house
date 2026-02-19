@@ -96,7 +96,7 @@ class IncomingInvoicesDetails extends StatelessWidget {
                           ),
                           _buildDetailRow("سعر التكلفة", "${item.costPrice}"),
                           _buildDetailRow(
-                            "الكميات (مستودع/ن1/ن2)",
+                            "الكميات (مستودع/نقطة اولى/نقطة ثانية)",
                             "${item.storehouseCount} / ${item.pos1Count} / ${item.pos2Count}",
                           ),
                           if (item.incomingInvoiceItemsNote != null &&
