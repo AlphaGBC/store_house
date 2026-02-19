@@ -10,6 +10,7 @@ import 'package:store_house/data/model/itemsmodel.dart';
 import 'package:store_house/sqflite.dart';
 import '../../routes.dart';
 import 'view_controller.dart';
+import '../items/view_controller.dart';
 
 class TransferAddController extends GetxController {
   SqlDb sqlDb = SqlDb();
@@ -146,7 +147,9 @@ class TransferAddController extends GetxController {
 
     try {
       int transferId = DateTime.now().millisecondsSinceEpoch;
-      String transferDate = DateTime.now().toString();
+      // بما أن السيرفر أقدم بـ 3 ساعات، نرسل الوقت الحالي مطروحاً منه 3 ساعات ليتوافق مع توقيت السيرفر
+      DateTime now = DateTime.now();
+      String transferDate = now.subtract(const Duration(hours: 3)).toString();
       List<Map<String, dynamic>> serverItems = [];
 
       for (var item in selectedTransferItems) {
@@ -190,6 +193,11 @@ class TransferAddController extends GetxController {
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
           FancySnackbar.show(title: "نجاح", message: "تمت عملية التحويل بنجاح");
+
+          // تحديث بيانات العناصر تلقائياً
+          if (Get.isRegistered<ItemsControllerImp>()) {
+            Get.find<ItemsControllerImp>().refreshItems();
+          }
 
           if (Get.isRegistered<TransferController>()) {
             Get.find<TransferController>().getData();

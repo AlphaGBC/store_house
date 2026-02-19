@@ -11,6 +11,7 @@ import 'package:store_house/data/model/supplier_model.dart';
 import 'package:store_house/sqflite.dart';
 import '../../routes.dart';
 import 'view_controller.dart';
+import '../items/view_controller.dart';
 
 class IncomingInvoicesAddController extends GetxController {
   SqlDb sqlDb = SqlDb();
@@ -139,7 +140,10 @@ class IncomingInvoicesAddController extends GetxController {
 
     try {
       int invoiceId = DateTime.now().millisecondsSinceEpoch;
-      String invoiceDate = DateTime.now().toString();
+      // بما أن السيرفر أقدم بـ 3 ساعات، نرسل الوقت الحالي مطروحاً منه 3 ساعات ليتوافق مع توقيت السيرفر
+      // هذا يضمن أن المزامنة ستعتبر البيانات القادمة من السيرفر "حديثة" بالنسبة للتوقيت المحلي المعدل
+      DateTime now = DateTime.now();
+      String invoiceDate = now.subtract(const Duration(hours: 3)).toString();
       List<Map<String, dynamic>> serverItems = [];
 
       for (var item in selectedInvoiceItems) {
@@ -200,6 +204,12 @@ class IncomingInvoicesAddController extends GetxController {
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
           FancySnackbar.show(title: "نجاح", message: "تم حفظ الفاتورة بنجاح");
+
+          // تحديث بيانات العناصر تلقائياً
+          if (Get.isRegistered<ItemsControllerImp>()) {
+            Get.find<ItemsControllerImp>().refreshItems();
+          }
+
           if (Get.isRegistered<IncomingInvoicesController>()) {
             Get.find<IncomingInvoicesController>().getData();
           }

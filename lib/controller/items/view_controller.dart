@@ -28,6 +28,7 @@ class ItemsControllerImp extends ItemsController {
   SqlDb sqlDb = SqlDb();
 
   // الفرق: السيرفر أقدم بـ 3 ساعات — نستخدم هذا للتعديل والتحويل.
+  // ملاحظة: إذا كان السيرفر أقدم بـ 3 ساعات، فهذا يعني أن (وقت السيرفر + 3 ساعات = الوقت المحلي)
   final Duration serverOffset = const Duration(hours: 3);
 
   @override
@@ -58,6 +59,7 @@ class ItemsControllerImp extends ItemsController {
   DateTime? _parseDate(String? s) {
     if (s == null) return null;
     try {
+      // تحويل السلسلة النصية إلى DateTime
       return DateTime.parse(s.replaceFirst(' ', 'T'));
     } catch (_) {
       try {
@@ -67,6 +69,14 @@ class ItemsControllerImp extends ItemsController {
         return null;
       }
     }
+  }
+
+  // دالة لتوحيد التوقيت عند المقارنة (تعديل وقت السيرفر ليتوافق مع المحلي)
+  DateTime? _getNormalizedRemoteDate(String? remoteDateStr) {
+    DateTime? remoteDt = _parseDate(remoteDateStr);
+    if (remoteDt == null) return null;
+    // بما أن السيرفر أقدم بـ 3 ساعات، نضيفها لنحصل على التوقيت المحلي المقابل
+    return remoteDt.add(serverOffset);
   }
 
   String _formatForServer(DateTime dt) {
@@ -224,6 +234,12 @@ class ItemsControllerImp extends ItemsController {
     }
   }
 
+  Future<void> refreshItems() async {
+    if (catid != null) {
+      await getItemsByCategories(int.parse(catid!));
+    }
+  }
+
   Future<void> upgradeItemsForCategory(int categoryId) async {
     try {
       // 0) Build maps
@@ -248,14 +264,15 @@ class ItemsControllerImp extends ItemsController {
         final remoteItem = remoteMap[id];
 
         if (remoteItem != null) {
-          // both exist -> compare dates
+          // كلاهما موجود -> قارن التواريخ
           DateTime? dl = _parseDate(localItem.itemsDate);
-          DateTime? dr = _parseDate(remoteItem.itemsDate);
-          if (dr != null && dl != null) {
-            final drAdjusted = dr.add(serverOffset); // server -> client axis
-            if (dl.isAfter(drAdjusted)) {
-              // local is newer -> update remote using upgrade()
-              bool _ = await _updateRemote(localItem);
+          DateTime? drAdjusted = _getNormalizedRemoteDate(remoteItem.itemsDate);
+
+          if (drAdjusted != null && dl != null) {
+            // إذا كان المحلي أحدث من السيرفر (بعد تعديل فارق التوقيت)
+            if (dl.isAfter(drAdjusted.add(const Duration(seconds: 5)))) {
+              // المحلي أحدث -> ارفع التحديث للسيرفر
+              await _updateRemote(localItem);
             }
           }
         }
@@ -272,23 +289,23 @@ class ItemsControllerImp extends ItemsController {
         final localItem = localMap[id];
 
         if (remoteItem != null && localItem != null) {
-          DateTime? dr = _parseDate(remoteItem.itemsDate);
+          DateTime? drAdjusted = _getNormalizedRemoteDate(remoteItem.itemsDate);
           DateTime? dl = _parseDate(localItem.itemsDate);
-          if (dr != null && dl != null) {
-            final drAdjusted = dr.add(serverOffset);
-            if (drAdjusted.isAfter(dl)) {
-              // remote newer -> update local (convert date to local axis)
+
+          if (drAdjusted != null && dl != null) {
+            // إذا كان السيرفر أحدث من المحلي (بعد تعديل فارق التوقيت)
+            if (drAdjusted.isAfter(dl.add(const Duration(seconds: 5)))) {
+              // السيرفر أحدث -> حدث القاعدة المحلية
+              // نخزن التاريخ المحلي المقابل (المعدل) لضمان استمرار المزامنة بشكل صحيح
               remoteItem.itemsDate = _formatLocal(drAdjusted);
               await _upsertLocal(remoteItem);
-            } else {
-              // local newer or equal -> already pushed in step 2
             }
           }
         } else if (remoteItem != null && localItem == null) {
-          // only remote -> insert locally (convert date)
-          DateTime? dr = _parseDate(remoteItem.itemsDate);
-          if (dr != null) {
-            remoteItem.itemsDate = _formatLocal(dr.add(serverOffset));
+          // موجود فقط في السيرفر -> أضفه محلياً
+          DateTime? drAdjusted = _getNormalizedRemoteDate(remoteItem.itemsDate);
+          if (drAdjusted != null) {
+            remoteItem.itemsDate = _formatLocal(drAdjusted);
           }
           await _upsertLocal(remoteItem);
         } else {

@@ -9,6 +9,7 @@ import 'package:store_house/data/model/incoming_invoices_model.dart';
 import 'package:store_house/sqflite.dart';
 import '../../routes.dart';
 import 'view_controller.dart';
+import '../items/view_controller.dart';
 
 class IncomingInvoicesEditController extends GetxController {
   IncomingInvoicesData incomingInvoicesData = IncomingInvoicesData(Get.find());
@@ -75,6 +76,11 @@ class IncomingInvoicesEditController extends GetxController {
           "incoming_invoice_items_id = ${model.incomingInvoiceItemsId}",
         );
         FancySnackbar.show(title: "نجاح", message: "تم تعديل البيانات بنجاح");
+
+        // تحديث بيانات العناصر تلقائياً
+        // if (Get.isRegistered<ItemsControllerImp>()) {
+        //   Get.find<ItemsControllerImp>().refreshItems();
+        // }
 
         if (Get.isRegistered<IncomingInvoicesController>()) {
           Get.find<IncomingInvoicesController>().getData();
