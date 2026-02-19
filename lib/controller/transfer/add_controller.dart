@@ -192,6 +192,13 @@ class TransferAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
+          // تحديث تاريخ العناصر محلياً لضمان نجاح المزامنة
+          for (var item in selectedTransferItems) {
+            await sqlDb.update("itemsview", {
+              "items_date": transferDate,
+            }, "items_id = ${item["items_id"]}");
+          }
+
           FancySnackbar.show(title: "نجاح", message: "تمت عملية التحويل بنجاح");
 
           // تحديث بيانات العناصر تلقائياً

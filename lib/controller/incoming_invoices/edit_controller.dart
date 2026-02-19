@@ -64,6 +64,14 @@ class IncomingInvoicesEditController extends GetxController {
 
     if (StatusRequest.success == statusRequest) {
       if (response['status'] == "success") {
+        // تحديث تاريخ العنصر محلياً لضمان نجاح المزامنة
+        // نستخدم الوقت الحالي مطروحاً منه 3 ساعات ليتوافق مع توقيت السيرفر
+        String updateDate =
+            DateTime.now().subtract(const Duration(hours: 3)).toString();
+        await sqlDb.update("itemsview", {
+          "items_date": updateDate,
+        }, "items_id = ${model.incomingInvoiceItemsItemsId}");
+
         await sqlDb.update(
           "incoming_invoice_itemsview",
           {
@@ -78,9 +86,9 @@ class IncomingInvoicesEditController extends GetxController {
         FancySnackbar.show(title: "نجاح", message: "تم تعديل البيانات بنجاح");
 
         // تحديث بيانات العناصر تلقائياً
-        // if (Get.isRegistered<ItemsControllerImp>()) {
-        //   Get.find<ItemsControllerImp>().refreshItems();
-        // }
+        if (Get.isRegistered<ItemsControllerImp>()) {
+          Get.find<ItemsControllerImp>().refreshItems();
+        }
 
         if (Get.isRegistered<IncomingInvoicesController>()) {
           Get.find<IncomingInvoicesController>().getData();

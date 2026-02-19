@@ -203,6 +203,14 @@ class IncomingInvoicesAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
+          // تحديث تاريخ العناصر محلياً لضمان نجاح المزامنة
+          // نستخدم نفس التاريخ الذي أرسلناه للسيرفر (توقيت السيرفر)
+          for (var item in selectedInvoiceItems) {
+            await sqlDb.update("itemsview", {
+              "items_date": invoiceDate,
+            }, "items_id = ${item["items_id"]}");
+          }
+
           FancySnackbar.show(title: "نجاح", message: "تم حفظ الفاتورة بنجاح");
 
           // تحديث بيانات العناصر تلقائياً
