@@ -10,6 +10,9 @@ import 'package:store_house/view/screen/incoming_invoices/incoming_invoices.dart
 import 'package:store_house/view/screen/incoming_invoices/incoming_invoices_add.dart';
 import 'package:store_house/view/screen/incoming_invoices/incoming_invoices_details.dart';
 import 'package:store_house/view/screen/incoming_invoices/incoming_invoices_edit.dart';
+import 'package:store_house/view/screen/transfer/transfer_view.dart';
+import 'package:store_house/view/screen/transfer/transfer_add.dart';
+import 'package:store_house/view/screen/transfer/transfer_details.dart';
 import 'package:store_house/view/screen/items/add.dart';
 import 'package:store_house/view/screen/items/edit.dart';
 import 'package:store_house/view/screen/items/item_movement.dart';
@@ -48,6 +51,9 @@ class AppRoute {
   static const String incomingInvoicesAdd = "/incomingInvoicesAdd";
   static const String incomingInvoicesDetails = "/incomingInvoicesDetails";
   static const String incomingInvoicesEdit = "/incomingInvoicesEdit";
+  static const String transferView = "/transferView";
+  static const String transferAdd = "/transferAdd";
+  static const String transferDetails = "/transferDetails";
 
   static const String itemMovement = "/itemMovement";
 }
@@ -98,6 +104,9 @@ List<GetPage<dynamic>>? routes = [
     name: AppRoute.incomingInvoicesEdit,
     page: () => const IncomingInvoicesEdit(),
   ),
+  GetPage(name: AppRoute.transferView, page: () => const TransferView()),
+  GetPage(name: AppRoute.transferAdd, page: () => const TransferAdd()),
+  GetPage(name: AppRoute.transferDetails, page: () => const TransferDetails()),
 
   GetPage(name: AppRoute.itemMovement, page: () => const ItemMovementView()),
 ];

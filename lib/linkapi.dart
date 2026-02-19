@@ -52,4 +52,7 @@ class AppLink {
 
   static const String issuedinvoicesAdd = "$server/issuedinvoices/add.php";
   static const String issuedinvoicesview = "$server/issuedinvoices/view.php";
+
+  static const String transferAdd = "$server/transfer/add.php";
+  static const String transferView = "$server/transfer/view.php";
 }

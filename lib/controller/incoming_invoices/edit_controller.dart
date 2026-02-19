@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/core/class/statusrequest.dart';
+import 'package:store_house/core/functions/checkinternet.dart';
+import 'package:store_house/core/functions/fancy_snackbar.dart';
 import 'package:store_house/core/functions/handingdatacontroller.dart';
 import 'package:store_house/data/datasource/remote/incoming_invoices_data.dart';
 import 'package:store_house/data/model/incoming_invoices_model.dart';
 import 'package:store_house/sqflite.dart';
+import '../../routes.dart';
 import 'view_controller.dart';
 
 class IncomingInvoicesEditController extends GetxController {
@@ -34,6 +37,14 @@ class IncomingInvoicesEditController extends GetxController {
   }
 
   Future<void> editData() async {
+    if (!await checkInternet()) {
+      FancySnackbar.show(
+        title: "خطأ",
+        message: "لا يوجد اتصال بالانترنت",
+        isError: true,
+      );
+      return;
+    }
     statusRequest = StatusRequest.loading;
     update();
 
@@ -63,13 +74,7 @@ class IncomingInvoicesEditController extends GetxController {
           },
           "incoming_invoice_items_id = ${model.incomingInvoiceItemsId}",
         );
-
-        Get.snackbar(
-          "نجاح",
-          "تم تعديل البيانات بنجاح",
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        FancySnackbar.show(title: "نجاح", message: "تم تعديل البيانات بنجاح");
 
         if (Get.isRegistered<IncomingInvoicesController>()) {
           Get.find<IncomingInvoicesController>().getData();
@@ -78,11 +83,17 @@ class IncomingInvoicesEditController extends GetxController {
         Future.delayed(const Duration(seconds: 1), () {
           Get.back();
         });
+        Get.offNamedUntil(
+          AppRoute.incomingInvoices,
+          ModalRoute.withName(AppRoute.homepage),
+        );
       } else {
-        Get.snackbar("خطأ", "فشل التعديل على السيرفر: ${response['message']}");
+        FancySnackbar.show(
+          title: "خطأ",
+          message: "لا يوجد اتصال بالانترنت",
+          isError: true,
+        );
       }
-    } else {
-      Get.snackbar("خطأ", "تعذر الاتصال بالسيرفر");
     }
 
     statusRequest = StatusRequest.success;

@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/core/class/statusrequest.dart';
+import 'package:store_house/core/functions/checkinternet.dart';
+import 'package:store_house/core/functions/fancy_snackbar.dart';
 import 'package:store_house/core/functions/handingdatacontroller.dart';
 import 'package:store_house/data/datasource/remote/incoming_invoices_data.dart';
 import 'package:store_house/data/model/itemsmodel.dart';
 import 'package:store_house/data/model/supplier_model.dart';
 import 'package:store_house/sqflite.dart';
+import '../../routes.dart';
 import 'view_controller.dart';
 
 class IncomingInvoicesAddController extends GetxController {
@@ -115,10 +119,21 @@ class IncomingInvoicesAddController extends GetxController {
 
   Future<void> saveData() async {
     if (selectedInvoiceItems.isEmpty) {
-      Get.snackbar("تنبيه", "يرجى إضافة عنصر واحد على الأقل");
+      FancySnackbar.show(
+        title: "تنبيه",
+        message: "يرجى إضافة عنصر واحد على الأقل",
+        isError: true,
+      );
       return;
     }
-
+    if (!await checkInternet()) {
+      FancySnackbar.show(
+        title: "خطأ",
+        message: "لا يوجد اتصال بالانترنت",
+        isError: true,
+      );
+      return;
+    }
     statusRequest = StatusRequest.loading;
     update();
 
@@ -129,7 +144,11 @@ class IncomingInvoicesAddController extends GetxController {
 
       for (var item in selectedInvoiceItems) {
         if (item["supplier_id"] == null) {
-          Get.snackbar("خطأ", "يرجى اختيار مورد للعنصر: ${item["items_name"]}");
+          FancySnackbar.show(
+            title: "خطأ",
+            message: "يرجى اختيار مورد للعنصر: ${item["items_name"]}",
+            isError: true,
+          );
           statusRequest = StatusRequest.success;
           update();
           return;
@@ -180,13 +199,7 @@ class IncomingInvoicesAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
-          Get.snackbar(
-            "نجاح",
-            "تم حفظ الفاتورة بنجاح",
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
-
+          FancySnackbar.show(title: "نجاح", message: "تم حفظ الفاتورة بنجاح");
           if (Get.isRegistered<IncomingInvoicesController>()) {
             Get.find<IncomingInvoicesController>().getData();
           }
@@ -194,21 +207,27 @@ class IncomingInvoicesAddController extends GetxController {
           Future.delayed(const Duration(seconds: 1), () {
             Get.back();
           });
+          Get.offNamedUntil(
+            AppRoute.incomingInvoices,
+            ModalRoute.withName(AppRoute.homepage),
+          );
         } else {
-          Get.snackbar(
-            "تنبيه",
-            "تم الحفظ محلياً ولكن فشل الرفع للسيرفر: ${response['message']}",
+          FancySnackbar.show(
+            title: "خطأ",
+            message: "لا يوجد اتصال بالانترنت",
+            isError: true,
           );
         }
-      } else {
-        Get.snackbar(
-          "تنبيه",
-          "تم الحفظ محلياً ولكن تعذر الاتصال بالسيرفر للرفع",
-        );
       }
     } catch (e) {
-      print("Error saving invoice: $e");
-      Get.snackbar("خطأ", "حدث خطأ أثناء الحفظ");
+      if (kDebugMode) {
+        print("Error saving invoice: $e");
+      }
+      FancySnackbar.show(
+        title: "خطأ",
+        message: "حدث خطأ أثناء الحفظ",
+        isError: true,
+      );
     }
 
     statusRequest = StatusRequest.success;
