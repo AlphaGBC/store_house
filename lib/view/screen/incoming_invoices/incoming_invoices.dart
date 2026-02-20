@@ -44,84 +44,90 @@ class IncomingInvoices extends StatelessWidget {
         onPressed: () => Get.toNamed(AppRoute.incomingInvoicesAdd),
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: GetBuilder<IncomingInvoicesController>(
-        builder:
-            (controller) => RefreshWrapper(
-              onRefresh: () => controller.getData(),
-              child: HandlingDataView(
-                statusRequest: controller.statusRequest,
-                widget: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  child: ListView.separated(
-                    itemCount: controller.invoiceIds.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 14),
-                    itemBuilder: (context, index) {
-                      final int invoiceId = controller.invoiceIds[index];
-                      final items = controller.groupedInvoices[invoiceId]!;
-                      final firstItem = items.first;
+      body: SafeArea(
+        top: false,
+        child: GetBuilder<IncomingInvoicesController>(
+          builder:
+              (controller) => RefreshWrapper(
+                onRefresh: () => controller.getData(),
+                child: HandlingDataView(
+                  statusRequest: controller.statusRequest,
+                  widget: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: ListView.separated(
+                      itemCount: controller.invoiceIds.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final int invoiceId = controller.invoiceIds[index];
+                        final items = controller.groupedInvoices[invoiceId]!;
+                        final firstItem = items.first;
 
-                      return GestureDetector(
-                        onTap: () {
-                          Get.toNamed(
-                            AppRoute.incomingInvoicesDetails,
-                            arguments: {"items": items, "invoiceId": invoiceId},
-                          );
-                        },
-                        child: Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                        return GestureDetector(
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoute.incomingInvoicesDetails,
+                              arguments: {
+                                "items": items,
+                                "invoiceId": invoiceId,
+                              },
+                            );
+                          },
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColor.primaryColor.withValues(
-                                  alpha: 0.1,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColor.primaryColor.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  shape: BoxShape.circle,
                                 ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.receipt_long,
-                                color: AppColor.primaryColor,
-                              ),
-                            ),
-                            title: Text(
-                              "رقم الفاتورة: $invoiceId",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("عدد العناصر: ${items.length}"),
-                                Text(
-                                  "التاريخ: ${firstItem.invoiceDate?.split(' ')[0] ?? "غير معروف"}",
+                                child: const Icon(
+                                  Icons.receipt_long,
+                                  color: AppColor.primaryColor,
                                 ),
-                              ],
-                            ),
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Colors.grey,
+                              ),
+                              title: Text(
+                                "رقم الفاتورة: $invoiceId",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("عدد العناصر: ${items.length}"),
+                                  Text(
+                                    "التاريخ: ${firstItem.invoiceDate?.split(' ')[0] ?? "غير معروف"}",
+                                  ),
+                                ],
+                              ),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
+        ),
       ),
     );
   }

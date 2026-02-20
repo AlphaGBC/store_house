@@ -69,6 +69,7 @@ class TransferAddController extends GetxController {
     selectedTransferItems.insert(0, {
       "items_id": item.itemsId,
       "items_name": item.itemsName,
+      "items_categories": item.itemsCategories,
       "original_storehouse_count":
           item.itemsStorehouseCount, // Fixed original count
       "current_storehouse_display":
@@ -192,6 +193,11 @@ class TransferAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
+          if (kDebugMode) {
+            print(
+              "✅ TransferAddController: تمت عملية التحويل بنجاح على السيرفر",
+            );
+          }
           // تحديث تاريخ العناصر محلياً لضمان نجاح المزامنة
           for (var item in selectedTransferItems) {
             await sqlDb.update("itemsview", {
@@ -201,9 +207,29 @@ class TransferAddController extends GetxController {
 
           FancySnackbar.show(title: "نجاح", message: "تمت عملية التحويل بنجاح");
 
-          // تحديث بيانات العناصر تلقائياً
+          // تحديث بيانات العناصر تلقائياً بناءً على الأقسام المتأثرة
           if (Get.isRegistered<ItemsControllerImp>()) {
-            Get.find<ItemsControllerImp>().refreshItems();
+            List<String> affectedCatIds =
+                selectedTransferItems
+                    .where((e) => e["items_categories"] != null)
+                    .map((e) => e["items_categories"].toString())
+                    .toSet()
+                    .toList();
+            if (kDebugMode) {
+              print("📢 TransferAddController: تحديث الأقسام: $affectedCatIds");
+            }
+            if (affectedCatIds.isNotEmpty) {
+              await Get.find<ItemsControllerImp>().refreshItems(
+                catIds: affectedCatIds,
+              );
+              if (kDebugMode) {
+                print("✅ TransferAddController: تم تحديث البيانات بنجاح");
+              }
+            }
+          } else {
+            if (kDebugMode) {
+              print("⚠️ TransferAddController: ItemsControllerImp غير مسجل");
+            }
           }
 
           if (Get.isRegistered<TransferController>()) {
@@ -218,6 +244,11 @@ class TransferAddController extends GetxController {
             ModalRoute.withName(AppRoute.homepage),
           );
         } else {
+          if (kDebugMode) {
+            print(
+              "❌ TransferAddController: الرد من السيرفر: ${response['status']}",
+            );
+          }
           FancySnackbar.show(
             title: "خطأ",
             message: "لا يوجد اتصال بالانترنت",

@@ -39,127 +39,130 @@ class HomePage extends StatelessWidget {
             alertExitApp();
           }
         },
-        child: GetBuilder<SearchMixController>(
-          builder:
-              (controller) => HandlingDataView(
-                statusRequest: searchMixController.statusRequest,
-                widget:
-                    !searchMixController.isSearch
-                        ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ListView(
-                            children: [
-                              GridView(
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount:
-                                          getValueForScreenType<int>(
-                                            context: context,
-                                            mobile: 3,
-                                            tablet: 4,
-                                            desktop: 60,
-                                          ),
-                                      mainAxisExtent: 150,
+        child: SafeArea(
+          top: false,
+          child: GetBuilder<SearchMixController>(
+            builder:
+                (controller) => HandlingDataView(
+                  statusRequest: searchMixController.statusRequest,
+                  widget:
+                      !searchMixController.isSearch
+                          ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView(
+                              children: [
+                                GridView(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount:
+                                            getValueForScreenType<int>(
+                                              context: context,
+                                              mobile: 3,
+                                              tablet: 4,
+                                              desktop: 60,
+                                            ),
+                                        mainAxisExtent: 150,
+                                      ),
+                                  physics: NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  children: [
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.categoriesView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "الاقسام الرئيسية",
                                     ),
-                                physics: NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                children: [
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.categoriesView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الاقسام الرئيسية",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(
-                                        AppRoute.categoriesViewShared,
-                                      );
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الاصناف",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.orderCardsPage);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الفواتير",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.incomingInvoices);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "فواتير الادخال",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.transferView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "نقل المواد",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.itemMovement);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "حركة العنصر",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.inventoryView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الجرد",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.scanProductQrPage);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "مسح QR للمنتج",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.usdView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "سعر الدولار",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.wholesaleView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "عملاء الجملة",
-                                  ),
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.supplierView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "الموردين",
-                                  ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(
+                                          AppRoute.categoriesViewShared,
+                                        );
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "الاصناف",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.orderCardsPage);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "الفواتير",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.incomingInvoices);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "فواتير الادخال",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.transferView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "نقل المواد",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.itemMovement);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "حركة العنصر",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.inventoryView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "الجرد",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.scanProductQrPage);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "مسح QR للمنتج",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.usdView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "سعر الدولار",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.wholesaleView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "عملاء الجملة",
+                                    ),
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.supplierView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "الموردين",
+                                    ),
 
-                                  Cardadmin(
-                                    onTap: () {
-                                      Get.toNamed(AppRoute.revenueView);
-                                    },
-                                    url: AppImageAsset.logo,
-                                    title: "حساب الغلة",
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    Cardadmin(
+                                      onTap: () {
+                                        Get.toNamed(AppRoute.revenueView);
+                                      },
+                                      url: AppImageAsset.logo,
+                                      title: "حساب الغلة",
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                          : ListSearchResults(
+                            items: searchMixController.listItems,
                           ),
-                        )
-                        : ListSearchResults(
-                          items: searchMixController.listItems,
-                        ),
-              ),
+                ),
+          ),
         ),
       ),
     );

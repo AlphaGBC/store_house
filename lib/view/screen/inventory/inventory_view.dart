@@ -23,36 +23,39 @@ class InventoryView extends StatelessWidget {
           ),
         ],
       ),
-      body: GetBuilder<InventoryController>(
-        builder:
-            (controller) => HandlingDataView(
-              statusRequest: controller.statusRequest,
-              widget: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    // Summary Cards
-                    _buildSummarySection(controller),
-                    const SizedBox(height: 16),
+      body: SafeArea(
+        top: false,
+        child: GetBuilder<InventoryController>(
+          builder:
+              (controller) => HandlingDataView(
+                statusRequest: controller.statusRequest,
+                widget: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      // Summary Cards
+                      _buildSummarySection(controller),
+                      const SizedBox(height: 16),
 
-                    // Search Bar
-                    _buildSearchBar(controller),
-                    const SizedBox(height: 16),
+                      // Search Bar
+                      _buildSearchBar(controller),
+                      const SizedBox(height: 16),
 
-                    // Items List
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: controller.filteredItems.length,
-                        itemBuilder: (context, index) {
-                          final item = controller.filteredItems[index];
-                          return _buildItemCard(context, item, controller);
-                        },
+                      // Items List
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: controller.filteredItems.length,
+                          itemBuilder: (context, index) {
+                            final item = controller.filteredItems[index];
+                            return _buildItemCard(context, item, controller);
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
+        ),
       ),
     );
   }

@@ -24,29 +24,32 @@ class OrderCardsPage extends GetView<OrderCardsController> {
         backgroundColor: AppColor.primaryColor,
         foregroundColor: Colors.white,
       ),
-      body: GetBuilder<OrderCardsController>(
-        builder: (controller) {
-          return Column(
-            children: [
-              // Filters section - Customer type only
-              _buildFiltersSection(controller),
+      body: SafeArea(
+        top: false,
+        child: GetBuilder<OrderCardsController>(
+          builder: (controller) {
+            return Column(
+              children: [
+                // Filters section - Customer type only
+                _buildFiltersSection(controller),
 
-              // Tab bar for POS selection
-              _buildTabBar(controller),
+                // Tab bar for POS selection
+                _buildTabBar(controller),
 
-              // Orders list
-              Expanded(
-                child: RefreshWrapper(
-                  onRefresh: () => controller.refreshOrders(),
-                  child: HandlingDataView(
-                    statusRequest: controller.statusRequest,
-                    widget: _buildOrdersList(context, controller, usd.price),
+                // Orders list
+                Expanded(
+                  child: RefreshWrapper(
+                    onRefresh: () => controller.refreshOrders(),
+                    child: HandlingDataView(
+                      statusRequest: controller.statusRequest,
+                      widget: _buildOrdersList(context, controller, usd.price),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

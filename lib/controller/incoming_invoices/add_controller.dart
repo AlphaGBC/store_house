@@ -84,6 +84,7 @@ class IncomingInvoicesAddController extends GetxController {
     selectedInvoiceItems.insert(0, {
       "items_id": item.itemsId,
       "items_name": item.itemsName,
+      "items_categories": item.itemsCategories,
       "supplier_id": null,
       "supplier_name": "",
       "supplier_date": "",
@@ -203,6 +204,9 @@ class IncomingInvoicesAddController extends GetxController {
 
       if (StatusRequest.success == statusRequest) {
         if (response['status'] == "success") {
+          if (kDebugMode) {
+            print("✅ IncomingInvoicesAddController: تم حفظ الفاتورة بنجاح");
+          }
           // تحديث تاريخ العناصر محلياً لضمان نجاح المزامنة
           // نستخدم نفس التاريخ الذي أرسلناه للسيرفر (توقيت السيرفر)
           for (var item in selectedInvoiceItems) {
@@ -213,9 +217,35 @@ class IncomingInvoicesAddController extends GetxController {
 
           FancySnackbar.show(title: "نجاح", message: "تم حفظ الفاتورة بنجاح");
 
-          // تحديث بيانات العناصر تلقائياً
+          // تحديث بيانات العناصر تلقائياً بناءً على الأقسام المتأثرة
           if (Get.isRegistered<ItemsControllerImp>()) {
-            Get.find<ItemsControllerImp>().refreshItems();
+            List<String> affectedCatIds =
+                selectedInvoiceItems
+                    .where((e) => e["items_categories"] != null)
+                    .map((e) => e["items_categories"].toString())
+                    .toSet()
+                    .toList();
+            if (kDebugMode) {
+              print(
+                "📢 IncomingInvoicesAddController: تحديث الأقسام: $affectedCatIds",
+              );
+            }
+            if (affectedCatIds.isNotEmpty) {
+              await Get.find<ItemsControllerImp>().refreshItems(
+                catIds: affectedCatIds,
+              );
+              if (kDebugMode) {
+                print(
+                  "✅ IncomingInvoicesAddController: تم تحديث البيانات بنجاح",
+                );
+              }
+            }
+          } else {
+            if (kDebugMode) {
+              print(
+                "⚠️ IncomingInvoicesAddController: ItemsControllerImp غير مسجل",
+              );
+            }
           }
 
           if (Get.isRegistered<IncomingInvoicesController>()) {
@@ -230,6 +260,11 @@ class IncomingInvoicesAddController extends GetxController {
             ModalRoute.withName(AppRoute.homepage),
           );
         } else {
+          if (kDebugMode) {
+            print(
+              "❌ IncomingInvoicesAddController: الرد من السيرفر: ${response['status']}",
+            );
+          }
           FancySnackbar.show(
             title: "خطأ",
             message: "لا يوجد اتصال بالانترنت",

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_house/core/class/statusrequest.dart';
@@ -64,6 +65,11 @@ class IncomingInvoicesEditController extends GetxController {
 
     if (StatusRequest.success == statusRequest) {
       if (response['status'] == "success") {
+        if (kDebugMode) {
+          print(
+            "✅ IncomingInvoicesEditController: تم تعديل البيانات بنجاح على السيرفر",
+          );
+        }
         // تحديث تاريخ العنصر محلياً لضمان نجاح المزامنة
         // نستخدم الوقت الحالي مطروحاً منه 3 ساعات ليتوافق مع توقيت السيرفر
         String updateDate =
@@ -85,9 +91,52 @@ class IncomingInvoicesEditController extends GetxController {
         );
         FancySnackbar.show(title: "نجاح", message: "تم تعديل البيانات بنجاح");
 
-        // تحديث بيانات العناصر تلقائياً
+        // تحديث بيانات العناصر تلقائياً - تفعيل المزامنة
         if (Get.isRegistered<ItemsControllerImp>()) {
-          Get.find<ItemsControllerImp>().refreshItems();
+          // جلب items_categories من جدول itemsview بدلاً من الاعتماد على model
+          try {
+            final db = await sqlDb.db;
+            final itemData = await db!.query(
+              "itemsview",
+              where: "items_id = ?",
+              whereArgs: [model.incomingInvoiceItemsItemsId],
+            );
+            if (itemData.isNotEmpty) {
+              int? itemsCategories = itemData[0]['items_categories'] as int?;
+              if (kDebugMode) {
+                print(
+                  "📢 IncomingInvoicesEditController: بدء مزامنة الفئة: $itemsCategories",
+                );
+              }
+              if (itemsCategories != null && itemsCategories > 0) {
+                try {
+                  final controller = Get.find<ItemsControllerImp>();
+                  await controller.upgradeItemsForCategory(itemsCategories);
+                  if (kDebugMode) {
+                    print(
+                      "✅ IncomingInvoicesEditController: تمت المزامنة بنجاح",
+                    );
+                  }
+                } catch (controllerError) {
+                  if (kDebugMode) {
+                    print(
+                      "⚠️ IncomingInvoicesEditController: خطأ في استدعاء المزامنة: $controllerError",
+                    );
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print("⚠️ IncomingInvoicesEditController: خطأ في جلب الفئة: $e");
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print(
+              "⚠️ IncomingInvoicesEditController: ItemsControllerImp غير مسجل",
+            );
+          }
         }
 
         if (Get.isRegistered<IncomingInvoicesController>()) {
@@ -102,6 +151,11 @@ class IncomingInvoicesEditController extends GetxController {
           ModalRoute.withName(AppRoute.homepage),
         );
       } else {
+        if (kDebugMode) {
+          print(
+            "❌ IncomingInvoicesEditController: الرد من السيرفر: ${response['status']}",
+          );
+        }
         FancySnackbar.show(
           title: "خطأ",
           message: "لا يوجد اتصال بالانترنت",

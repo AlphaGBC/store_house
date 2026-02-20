@@ -41,10 +41,18 @@ class ItemsControllerImp extends ItemsController {
 
   @override
   intialData() {
-    categories = Get.arguments['categories'];
+    if (Get.arguments == null) {
+      if (kDebugMode) {
+        print("⚠️ ItemsControllerImp: لا توجد arguments في intialData");
+      }
+      return;
+    }
+    categories = Get.arguments['categories'] ?? [];
     selectedCat = Get.arguments['selectedcat'];
     catid = Get.arguments['catid'];
-    getItemsByCategories(int.parse(catid!));
+    if (catid != null) {
+      getItemsByCategories(int.parse(catid!));
+    }
   }
 
   @override
@@ -234,14 +242,27 @@ class ItemsControllerImp extends ItemsController {
     }
   }
 
-  Future<void> refreshItems() async {
-    if (catid != null) {
+  Future<void> refreshItems({List<String>? catIds}) async {
+    // إذا تم تمرير قائمة catIds، نقوم بتحديث كل قسم منها
+    if (catIds != null && catIds.isNotEmpty) {
+      for (String id in catIds) {
+        await getItemsByCategories(int.parse(id));
+      }
+    } else if (catid != null) {
+      // السلوك الافتراضي: تحديث القسم الحالي إذا كان موجوداً
       await getItemsByCategories(int.parse(catid!));
     }
   }
 
   Future<void> upgradeItemsForCategory(int categoryId) async {
     try {
+      if (categoryId <= 0) {
+        if (kDebugMode) {
+          print("⚠️ upgradeItemsForCategory: categoryId غير صحيح: $categoryId");
+        }
+        return;
+      }
+
       // 0) Build maps
       // get local map
       final localMap = await _localMap(categoryId);
@@ -251,6 +272,9 @@ class ItemsControllerImp extends ItemsController {
       var stRemote = handlingData(remoteResponse);
       if (stRemote != StatusRequest.success ||
           remoteResponse['status'] != "success") {
+        if (kDebugMode) {
+          print("⚠️ upgradeItemsForCategory: فشل جلب البيانات من السيرفر");
+        }
         return;
       }
 

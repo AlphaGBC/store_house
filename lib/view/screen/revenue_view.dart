@@ -28,66 +28,69 @@ class RevenueView extends StatelessWidget {
           ),
         ],
       ),
-      body: GetBuilder<RevenueController>(
-        builder:
-            (controller) => HandlingDataView(
-              statusRequest: controller.statusRequest,
-              widget: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Custom Range Section (if selected)
-                    if (controller.startDate != null)
-                      _buildCustomRangeSection(controller),
+      body: SafeArea(
+        top: false,
+        child: GetBuilder<RevenueController>(
+          builder:
+              (controller) => HandlingDataView(
+                statusRequest: controller.statusRequest,
+                widget: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Custom Range Section (if selected)
+                      if (controller.startDate != null)
+                        _buildCustomRangeSection(controller),
 
-                    const Text(
-                      "الغلة اليومية",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      const Text(
+                        "الغلة اليومية",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildRevenueRow(
-                      controller.dailyPos1,
-                      controller.dailyPos2,
-                    ),
-
-                    const SizedBox(height: 24),
-                    const Text(
-                      "الغلة الأسبوعية (آخر 7 أيام)",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(height: 10),
+                      _buildRevenueRow(
+                        controller.dailyPos1,
+                        controller.dailyPos2,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildRevenueRow(
-                      controller.weeklyPos1,
-                      controller.weeklyPos2,
-                    ),
 
-                    const SizedBox(height: 24),
-                    const Text(
-                      "الغلة الشهرية",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      const SizedBox(height: 24),
+                      const Text(
+                        "الغلة الأسبوعية (آخر 7 أيام)",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildRevenueRow(
-                      controller.monthlyPos1,
-                      controller.monthlyPos2,
-                    ),
+                      const SizedBox(height: 10),
+                      _buildRevenueRow(
+                        controller.weeklyPos1,
+                        controller.weeklyPos2,
+                      ),
 
-                    const SizedBox(height: 30),
-                    _buildTotalSummary(controller),
-                  ],
+                      const SizedBox(height: 24),
+                      const Text(
+                        "الغلة الشهرية",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildRevenueRow(
+                        controller.monthlyPos1,
+                        controller.monthlyPos2,
+                      ),
+
+                      const SizedBox(height: 30),
+                      _buildTotalSummary(controller),
+                    ],
+                  ),
                 ),
               ),
-            ),
+        ),
       ),
     );
   }
